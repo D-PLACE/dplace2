@@ -16,3 +16,4 @@ CLLD.LayerOptions.regions = {
         layer.bindTooltip(feature.properties.REGION_NAM);
     }
 };
+
