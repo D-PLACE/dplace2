@@ -1,0 +1,51 @@
+# Translations template for dplace2.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the dplace2 project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: dplace2 0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-01-31 11:50+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.3\n"
+
+#: dplace2/__init__.py:7
+msgid "Language"
+msgstr ""
+
+#: dplace2/__init__.py:8
+msgid "Languages"
+msgstr ""
+
+#: dplace2/__init__.py:9
+msgid "Contribution"
+msgstr ""
+
+#: dplace2/__init__.py:10
+msgid "Contributions"
+msgstr ""
+
+#: dplace2/__init__.py:11
+msgid "Parameter"
+msgstr ""
+
+#: dplace2/__init__.py:12
+msgid "Parameters"
+msgstr ""
+
+#: dplace2/__init__.py:13
+msgid "DomainElement"
+msgstr ""
+
+#: dplace2/__init__.py:14
+msgid "DomainElements"
+msgstr ""
+

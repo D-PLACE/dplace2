@@ -46,9 +46,6 @@ coverage.xml
 *.cover
 .hypothesis/
 
-# Translations
-*.mo
-*.pot
 
 # Django stuff:
 *.log
@@ -99,3 +96,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# pycharm
+.idea

@@ -1,0 +1,24 @@
+
+@font-face {
+    font-family: "DPLACE";
+    src: url("/static/fonts/GT-Walsheim-Regular.woff");
+}
+@font-face {
+    font-family: "DPLACE";
+    src: url("/static/fonts/GT-Walsheim-Bold.woff");
+    font-weight: bold;
+}
+@font-face {
+    font-family: "DPLACE";
+    src: url("/static/fonts/GT-Walsheim-Regular-Oblique.woff");
+    font-style: italic;
+}
+@font-face {
+    font-family: "DPLACE";
+    src: url("/static/fonts/GT-Walsheim-Bold-Oblique.woff");
+    font-weight: bold;
+    font-style: italic;
+}
+body {
+    font-family: "DPLACE";
+}
