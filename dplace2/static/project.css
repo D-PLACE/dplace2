@@ -22,3 +22,29 @@
 body {
     font-family: "DPLACE";
 }
+
+.dplace-map-icon
+{
+  border:1px solid black;
+  color:blue;
+  font-weight:bold;
+  text-align:center;
+  border-radius:50%;
+  line-height:12px;
+  width: 12px;
+  opacity: 0.7;
+}
+.clld-map-icon {opacity: 0.7;}
+
+.tree-tooltip {
+    position:absolute;
+    text-align:center;
+    width:auto;
+    height:auto;
+    padding:2px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:13px;
+    background:#E0E0E0;
+    border:0px;
+}

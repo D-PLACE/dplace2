@@ -6,10 +6,21 @@ following a special naming convention which are called to update the template co
 before rendering resource's detail or index views.
 """
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from clld.db.meta import DBSession
+from clld.db.models import common
 from clld.web.util.helpers import HTML
 
 from dplace2 import models
+
+
+def language_detail_html(request=None, context=None, **kw):
+    return {
+        'sources': DBSession.query(common.Source)
+        .join(common.LanguageSource)
+        .filter(common.LanguageSource.language_pk == context.pk)
+        .order_by(common.Source.name)
+        .all()}
 
 
 def variables_by_category(dataset):

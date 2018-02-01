@@ -1,20 +1,20 @@
 from zope.interface import implementer
 from sqlalchemy import (
     Column,
-    String,
     Unicode,
+    Float,
     Integer,
-    Boolean,
     ForeignKey,
     UniqueConstraint,
 )
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin
-from clld.db.models.common import Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin
+from clld.db.models.common import (
+    Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin, Value,
+)
+from clld.db.models.source import HasSourceNotNullMixin
 
 
 @implementer(interfaces.IContribution)
@@ -23,6 +23,7 @@ class DplaceDataset(CustomModelMixin, Contribution):
     type = Column(Unicode)
     count_societies = Column(Integer)
     count_variables = Column(Integer)
+    color = Column(Unicode)
 
 
 @implementer(interfaces.ILanguage)
@@ -30,6 +31,7 @@ class Society(CustomModelMixin, Language):
     pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
     dataset_pk = Column(Integer, ForeignKey('dplacedataset.pk'))
     dataset = relationship(DplaceDataset)
+    region = Column(Unicode)
 
 
 class Category(Base, IdNameDescriptionMixin):
@@ -56,3 +58,34 @@ class VariableCategory(Base):
 @implementer(interfaces.IDomainElement)
 class Code(CustomModelMixin, DomainElement):
     pk = Column(Integer, ForeignKey('domainelement.pk'), primary_key=True)
+    color = Column(Unicode)
+
+
+@implementer(interfaces.IValue)
+class Datapoint(CustomModelMixin, Value):
+    pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
+    comment = Column(Unicode)
+    year = Column(Integer)
+    sub_case = Column(Unicode)
+    source = Column(Unicode)
+    value_float = Column(Float)
+
+
+class DatapointReference(Base, HasSourceNotNullMixin):
+    __table_args__ = (UniqueConstraint('value_pk', 'source_pk', 'description'),)
+
+    value_pk = Column(Integer, ForeignKey('value.pk'), nullable=False)
+    value = relationship(Value, innerjoin=True, backref="references")
+
+
+#class Tree(Base, IdNameDescriptionMixin):
+#    pass
+
+
+#class TreeLabel(Base, IdNameDescriptionMixin):
+#    tree_pk = Column()
+#    tree = relationship()
+
+
+#class TreeLabelSociety():
+#    ord = Column(Integer)
