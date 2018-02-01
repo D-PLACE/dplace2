@@ -55,7 +55,7 @@ class DplaceMapMarker(MapMarker):
      width="20">
     <circle cx="10" cy="10" r="8" style="stroke:#000000; fill:{0}" opacity="0.8"/>
 </svg>""".format(color)
-        return b'data:image/svg+xml;base64,%s' % b64encode(svg).decode()
+        return b'data:image/svg+xml;base64,%s' % b64encode(svg.encode('utf8')).decode()
 
 
 class DplaceCtxFactoryQuery(CtxFactoryQuery):
