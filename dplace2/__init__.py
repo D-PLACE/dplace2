@@ -29,25 +29,7 @@ _('DomainElements')
 
 class DplaceMapMarker(MapMarker):
     def __call__(self, ctx, req):
-        color = None
-        if isinstance(ctx, common.ValueSet):
-            value = ctx.values[0]
-            if value.domainelement:
-                color = value.domainelement.color
-            elif 'color' in value.jsondata or {}:
-                color = value.jsondata['color']
-        elif isinstance(ctx, common.Value):
-            if ctx.domainelement:
-                color = ctx.domainelement.color
-            elif 'color' in ctx.jsondata or {}:
-                color = ctx.jsondata['color']
-        elif isinstance(ctx, common.DomainElement):
-            color = ctx.color
-        elif isinstance(ctx, common.Language):
-            color = ctx.dataset.color
-        elif isinstance(ctx, common.Contribution):
-            color = ctx.color
-
+        color = models.get_color(ctx)
         if not color:
             return MapMarker.__call__(self, ctx, req)
 
@@ -79,4 +61,6 @@ def main(global_config, **settings):
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
     config.register_resource('phylogeny', models.Phylogeny, IPhylogeny, with_index=True)
+    config.add_route('variable_phylogeny', '/variable_phylogeny')
+    config.add_route('dcombination', '/dcombination')
     return config.make_wsgi_app()

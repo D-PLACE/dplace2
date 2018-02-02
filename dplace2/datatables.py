@@ -62,7 +62,7 @@ class Variables(Parameters):
                 LinkCol(
                     self,
                     'dataset',
-                    choices=sorted((c for c, in DBSession.query(DplaceDataset.name).join(Society).distinct())),
+                    choices=sorted((c for c, in DBSession.query(DplaceDataset.name).distinct())),
                     model_col=DplaceDataset.name,
                     get_object=lambda i: i.dataset))
         return res
@@ -93,6 +93,12 @@ class Societies(Languages):
         res = [
             IdCol(self, 'id'),
             LinkCol(self, 'name'),
+            Col(self, 'glottocode', model_col=Society.glottocode),
+            Col(self, 'language', model_col=Society.language, sTitle='Language'),
+            Col(self,
+                'language_family',
+                model_col=Society.language_family,
+                choices=get_distinct_values(Society.language_family)),
             Col(self,
                 'latitude',
                 sDescription='<small>The geographic latitude</small>'),

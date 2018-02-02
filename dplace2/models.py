@@ -14,6 +14,7 @@ from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin
 from clld.db.models.common import (
     Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin, Value,
+    ValueSet,
 )
 from clld.db.models.source import HasSourceNotNullMixin
 
@@ -112,3 +113,25 @@ class DatapointReference(Base, HasSourceNotNullMixin):
 
     value_pk = Column(Integer, ForeignKey('value.pk'), nullable=False)
     value = relationship(Value, innerjoin=True, backref="references")
+
+
+def get_color(ctx):
+    color = None
+    if isinstance(ctx, ValueSet):
+        value = ctx.values[0]
+        if value.domainelement:
+            color = value.domainelement.color
+        elif 'color' in value.jsondata or {}:
+            color = value.jsondata['color']
+    elif isinstance(ctx, Value):
+        if ctx.domainelement:
+            color = ctx.domainelement.color
+        elif 'color' in ctx.jsondata or {}:
+            color = ctx.jsondata['color']
+    elif isinstance(ctx, DomainElement):
+        color = ctx.color
+    elif isinstance(ctx, Language):
+        color = ctx.dataset.color
+    elif isinstance(ctx, Contribution):
+        color = ctx.color
+    return color

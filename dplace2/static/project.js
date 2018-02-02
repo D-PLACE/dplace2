@@ -25,7 +25,8 @@ CLLD.MapIcons.div = function (feature, size, url) {
     });
 };
 
-DPLACE2.labels_in_dplace = [];
+DPLACE2.labels_in_dplace = {};
+DPLACE2.labelColor = {};
 
 DPLACE2.nodeStyler = function (container, node) {
     var text, current, html;
@@ -33,7 +34,7 @@ DPLACE2.nodeStyler = function (container, node) {
         //container.attr("xlink:href", "http://glottolog.org/");
         text = container.select("text");
         current = text.text();
-        if (!text.text().endsWith('abcd')) {
+        if (!text.text().endsWith(' ')) {
             text.text('   ' + text.text() + ' ');
             if (DPLACE2.labels_in_dplace.hasOwnProperty(current)) {
                 html = DPLACE2.labels_in_dplace[current].join('; ');
@@ -41,7 +42,7 @@ DPLACE2.nodeStyler = function (container, node) {
                 container.append("circle")
                     .attr("height", 12)
                     .attr("width", 12)
-                    .style("fill", "lightgreen")
+                    .style("fill", DPLACE2.labelColor[current] || "lightgreen")
                     .attr("r", 5)
                     .attr("stroke", "#000")
                     .attr("stroke-width", "0.5")
