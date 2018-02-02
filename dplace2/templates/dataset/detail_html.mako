@@ -1,22 +1,9 @@
 <%inherit file="../home_comp.mako"/>
 
-<%block name="head">
-    <link rel="stylesheet" href="${req.static_url('dplace2:static/phylotree.css')}">
-    <script src="//d3js.org/d3.v3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="${req.static_url('dplace2:static/phylotree.js')}"></script>
-    <style>
-        #tree_display {width: 500px; height: auto;}
-    </style>
-</%block>
-
-
-
 <%def name="sidebar()">
     <div>
         <img src="${request.static_url('dplace2:static/D-PLACE_Logo.png')}"/>
     </div>
-    <svg id="tree_display" width="200"></svg>
 </%def>
 
 <h2>Database of Places, Language, Culture and Environment</h2>
@@ -52,18 +39,3 @@ More information on: citing D-PLACE, related publications, and the technology an
 <p>
 D-PLACE is a work in progress. We welcome suggestions for corrections and/or for additional data.
 </p>
-
-<%block name="javascript">
-    $(function() {
-        var example_tree = "(('Mer {Bench} [merr1238]':1,'Nuclear Bench [nucl1433]':1,'She {Ethiopia} [shee1239]':1)'Bench [benc1235][bcq]-l-':1,('Anfillo [anfi1235][myo]-l-':1,('Amuru [amur1243]':1,'Gamila [gami1244]':1,'Guba {Ethiopia} [guba1244]':1,'Wembera [wemb1240]':1)'Boro {Ethiopia} [boro1277][bwo]-l-':1,(('Bosha [bosh1241]':1,'Nuclear Kafa [nucl1434]':1)'Kafa [kafa1242][kbr]-l-':1,'Shekkacho [shek1244][moy]-l-':1)'South Gonga [sout2835]':1)'Kefoid [gong1256]':1,('Chara [char1269][cra]-l-':1,(('Ganjule [ganj1241]':1,'Ganta [gant1243]':1,'Kachama [kach1285]':1)'Kachama-Ganjule-Haro [kach1284][kcx]-l-':1,'Koorete [koor1239][kqy]-l-':1,('Zayse [zays1236]':1,'Zergulla [zerg1235]':1)'Zayse-Zergulla [zays1235][zay]-l-':1)'East Ometo [east2423]':1,('Basketo [bask1236][bst]-l-':1,(('Dawro [dawr1236][dwr]-l-':1,'Gamo [gamo1243][gmv]-l-':1,'Gofa [gofa1235][gof]-l-':1)'Dawro-Gofa-Gamo [dawr1235]':1,'Dorze [dorz1235][doz]-l-':1,'Melo [melo1242][mfx]-l-':1,'Oyda [oyda1235][oyd]-l-':1,('Zala [zala1240]':1)'Wolaytta [wola1242][wal]-l-':1)'Central Ometo [cent2046]':1,'Male {Ethiopia} [male1284][mdy]-l-':1)'North-West Ometo [nort3161]':1)'Ometo [omet1238]':1,('Fuga of Jimma [fuga1235]':1,'Toba {Ethiopia} [toba1264]':1)'Yemsa [yems1235][jnj]-l-':1)'Ta-Ne-Omotic [gong1255]':1";
-        var tree = d3.layout.phylotree().svg(d3.select("#tree_display"))
-        .options({
-            'reroot': false,
-            'brush': false,
-            'align-tips': true,
-            'show-scale': false
-        })
-        .style_nodes(DPLACE2.nodeStyler);
-        tree(example_tree).layout();
-});
-</%block>

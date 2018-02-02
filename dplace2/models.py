@@ -4,6 +4,7 @@ from sqlalchemy import (
     Unicode,
     Float,
     Integer,
+    Boolean,
     ForeignKey,
     UniqueConstraint,
 )
@@ -16,9 +17,30 @@ from clld.db.models.common import (
 )
 from clld.db.models.source import HasSourceNotNullMixin
 
+from dplace2.interfaces import IPhylogeny
+
+
+class WithSourceMixin(object):
+    year = Column(Integer)
+    author = Column(Unicode)
+    url = Column(Unicode)
+    reference = Column(Unicode)
+
+
+@implementer(IPhylogeny)
+class Phylogeny(Base, IdNameDescriptionMixin, WithSourceMixin):
+    newick = Column(Unicode)
+    glottolog = Column(Boolean)
+
+
+class Label(Base, IdNameDescriptionMixin):
+    phylogeny_pk = Column(Integer, ForeignKey('phylogeny.pk'))
+    phylogeny = relationship(Phylogeny, backref='labels')
+    glottocode = Column(Unicode)
+
 
 @implementer(interfaces.IContribution)
-class DplaceDataset(CustomModelMixin, Contribution):
+class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     pk = Column(Integer, ForeignKey('contribution.pk'), primary_key=True)
     type = Column(Unicode)
     count_societies = Column(Integer)
@@ -29,9 +51,23 @@ class DplaceDataset(CustomModelMixin, Contribution):
 @implementer(interfaces.ILanguage)
 class Society(CustomModelMixin, Language):
     pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
+    xid = Column(Unicode)
     dataset_pk = Column(Integer, ForeignKey('dplacedataset.pk'))
     dataset = relationship(DplaceDataset)
     region = Column(Unicode)
+    glottocode = Column(Unicode)
+    language = Column(Unicode)
+    language_family = Column(Unicode)
+
+
+class SocietyLabel(Base):
+    __table_args__ = (UniqueConstraint('society_pk', 'label_pk'),)
+
+    society_pk = Column(Integer, ForeignKey('society.pk'), nullable=False)
+    society = relationship(Society)
+    label_pk = Column(Integer, ForeignKey('label.pk'), nullable=False)
+    label = relationship(Label, backref='society_assocs')
+    ord = Column(Integer, default=1)
 
 
 class Category(Base, IdNameDescriptionMixin):
@@ -76,16 +112,3 @@ class DatapointReference(Base, HasSourceNotNullMixin):
 
     value_pk = Column(Integer, ForeignKey('value.pk'), nullable=False)
     value = relationship(Value, innerjoin=True, backref="references")
-
-
-#class Tree(Base, IdNameDescriptionMixin):
-#    pass
-
-
-#class TreeLabel(Base, IdNameDescriptionMixin):
-#    tree_pk = Column()
-#    tree = relationship()
-
-
-#class TreeLabelSociety():
-#    ord = Column(Integer)

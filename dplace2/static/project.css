@@ -48,3 +48,9 @@ body {
     background:#E0E0E0;
     border:0px;
 }
+
+#tree_display {
+    width: 100%;
+    margin-top: 20px;
+    margin-left: 1em;
+}

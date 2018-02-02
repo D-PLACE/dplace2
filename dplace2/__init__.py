@@ -12,12 +12,15 @@ from clld.web.util.helpers import data_uri
 
 # we must make sure custom models are known at database initialization!
 from dplace2 import models
+from dplace2.interfaces import IPhylogeny
 
 _ = lambda s: s
 _('Language')
 _('Languages')
 _('Contribution')
 _('Contributions')
+_('Phylogeny')
+_('Phylogenys')
 _('Parameter')
 _('Parameters')
 _('DomainElement')
@@ -75,4 +78,5 @@ def main(global_config, **settings):
     config.include('clldmpg')
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
+    config.register_resource('phylogeny', models.Phylogeny, IPhylogeny, with_index=True)
     return config.make_wsgi_app()

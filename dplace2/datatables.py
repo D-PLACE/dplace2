@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 
 from sqlalchemy.orm import joinedload, joinedload_all
-from clld.web.datatables.base import Col, LinkCol, LinkToMapCol, IdCol, DetailsRowLinkCol, RefsCol
+from clld.web.datatables.base import (
+    Col, LinkCol, LinkToMapCol, IdCol, DetailsRowLinkCol, RefsCol, DataTable,
+)
 from clld.web.datatables.language import Languages
 from clld.web.datatables.contribution import Contributions, CitationCol
 from clld.web.datatables.parameter import Parameters
@@ -13,7 +15,7 @@ from clld.web.util.htmllib import HTML
 
 from dplace2.models import (
     DplaceDataset, Society, Variable, Category, VariableCategory, Datapoint,
-    DatapointReference,
+    DatapointReference, Phylogeny,
 )
 
 
@@ -168,8 +170,25 @@ class Datapoints(Values):
         ]
 
 
+class Phylogenies(DataTable):
+    def col_defs(self):
+        return [
+            LinkCol(self, 'name'),
+            Col(self, 'author', model_col=Phylogeny.author),
+            Col(self, 'year', model_col=Phylogeny.year),
+            Col(self, 'glottolog', model_col=Phylogeny.glottolog),
+            Col(self, 'description'),
+        ]
+
+    def get_options(self):
+        opts = super(Phylogenies, self).get_options()
+        opts['aaSorting'] = [[3, 'asc'], [0, 'asc']]
+        return opts
+
+
 def includeme(config):
     config.register_datatable('languages', Societies)
     config.register_datatable('contributions', Datasets)
     config.register_datatable('parameters', Variables)
     config.register_datatable('values', Datapoints)
+    config.register_datatable('phylogenys', Phylogenies)

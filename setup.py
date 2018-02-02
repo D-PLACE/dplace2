@@ -28,6 +28,7 @@ setup(
         'dev': [
             'flake8',
             'tox',
+            'pydplace',
         ],
         'test': [
             'psycopg2',

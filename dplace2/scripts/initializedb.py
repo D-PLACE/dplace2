@@ -3,19 +3,19 @@ import sys
 from itertools import groupby, cycle, chain
 import re
 from colorsys import hsv_to_rgb
+from collections import defaultdict
 
 import transaction
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload_all
 from clldutils.path import Path
 from clldutils.misc import slug
-from clldutils.jsonlib import load
-from csvw.dsv import reader
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.bibtex import Database
 from pycldf import StructureDataset
+from pydplace.api import Repos
 
 import dplace2
 from dplace2 import models
@@ -75,6 +75,7 @@ def valid_id(s):
 
 def main(args):
     data = Data()
+    repos = Repos(DATA_REPOS)
 
     dataset = common.Dataset(
         id=dplace2.__name__,
@@ -98,16 +99,15 @@ def main(args):
         common.Editor(dataset=dataset, contributor=ed, ord=i + 1)
     DBSession.add(dataset)
 
-    for rec in Database.from_file(DATA_REPOS / 'datasets' / 'sources.bib', lowercase=True):
+    for rec in Database.from_file(repos.path('datasets', 'sources.bib'), lowercase=True):
         data.add(common.Source, rec.id, _obj=bibtex2source(rec))
 
-    regions = load(DATA_REPOS / 'geo' / 'societies_tdwg.json')
+    regions = repos.read_json('geo', 'societies_tdwg.json')
+    glottolog = {
+        r.id: r for r in repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
     dscolors = cycle(colorMap)
     dss = {}
-    for row in sorted(
-        reader(DATA_REPOS / 'datasets' / 'index.csv', namedtuples=True),
-        key=lambda d: d.type
-    ):
+    for row in sorted(repos.datasets, key=lambda d: (d.type, d.id)):
         c = data.add(
             models.DplaceDataset,
             row.id,
@@ -117,18 +117,22 @@ def main(args):
             color=next(dscolors),
             type=row.type)
         ds = StructureDataset.from_metadata(
-            DATA_REPOS / 'cldf' / row.id / 'StructureDataset-metadata.json')
+            repos.path('cldf', row.id, 'StructureDataset-metadata.json'))
         try:
             for row in ds['LanguageTable']:
                 data.add(
                     models.Society,
                     row['id'],
                     id=row['id'],
+                    xid=row['xd_id'],
                     name=row['pref_name_for_society'],
                     latitude=row['Lat'],
                     longitude=row['Long'],
                     region=regions.get(row['id'], {}).get('name'),
                     dataset=c,
+                    glottocode=row['glottocode'],
+                    language=glottolog[row['glottocode']].name,
+                    language_family=glottolog[row['glottocode']].family_name or None,
                 )
         except KeyError:
             # Dataset does not provide any societies
@@ -156,6 +160,10 @@ def main(args):
             pass
 
         dss[c.id] = ds
+        #
+        # Testing
+        #
+        #break
 
     DBSession.flush()
 
@@ -201,6 +209,51 @@ def main(args):
             pass
 
     transaction.commit()
+
+    for row in repos.phylogenies:
+        transaction.begin()
+        soc_by_id = {}
+        soc_by_xid = defaultdict(list)
+        for s in DBSession.query(models.Society):
+            soc_by_id[s.id] = s.pk
+            soc_by_xid[s.xid].append(s.pk)
+
+        tree = models.Phylogeny(
+            id=row.id,
+            name=row.name,
+            description=row.reference,
+            glottolog=row.is_glottolog,
+            newick=row.newick,
+            author=row.author,
+            year=int(row.year),
+            url=row.url,
+            reference=row.reference,
+        )
+        for k, taxon in enumerate(row.taxa):
+            label = models.Label(
+                id='{0}-{1}-{2}'.format(tree.id, slug(taxon.taxon), k + 1),
+                name=taxon.taxon,
+                phylogeny=tree,
+                glottocode=taxon.glottocode)
+            i = 0
+            seen = set()
+            for x in taxon.soc_ids:
+                if x in soc_by_id:
+                    spk = soc_by_id[x]
+                    if spk not in seen:
+                        i += 1
+                        models.SocietyLabel(ord=i, society_pk=soc_by_id[x], label=label)
+                        seen.add(spk)
+            for x in taxon.xd_ids:
+                if x in soc_by_xid:
+                    for spk in soc_by_xid[x]:
+                        if spk not in seen:
+                            i += 1
+                            models.SocietyLabel(ord=i, society_pk=spk, label=label)
+                            seen.add(spk)
+
+        DBSession.add(tree)
+        transaction.commit()
 
     year_pattern = re.compile('(?P<year>-?[0-9]+)')
     for cid, ds in dss.items():

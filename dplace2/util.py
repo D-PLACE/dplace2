@@ -9,9 +9,15 @@ from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clld.web.util.helpers import HTML
+from clld.web.util.htmllib import HTML
+from clld.web.util.helpers import external_link
+from purl import URL
 
 from dplace2 import models
+
+
+def ext_link(url):
+    return external_link(url, label=URL(url).domain(), title=url)
 
 
 def language_detail_html(request=None, context=None, **kw):
