@@ -19,6 +19,7 @@ from pydplace.api import Repos
 
 import dplace2
 from dplace2 import models
+from clld_phylogeny_plugin.models import TreeLabel, LanguageTreeLabel
 
 DATA_REPOS = Path(dplace2.__file__).parent / '..' / '..' / 'dplace-data'
 colorMap = [  # https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
@@ -218,7 +219,7 @@ def main(args):
             soc_by_id[s.id] = s.pk
             soc_by_xid[s.xid].append(s.pk)
 
-        tree = models.Phylogeny(
+        tree = models.DplacePhylogeny(
             id=row.id,
             name=row.name,
             description=row.reference,
@@ -230,27 +231,24 @@ def main(args):
             reference=row.reference,
         )
         for k, taxon in enumerate(row.taxa):
-            label = models.Label(
+            label = TreeLabel(
                 id='{0}-{1}-{2}'.format(tree.id, slug(taxon.taxon), k + 1),
                 name=taxon.taxon,
                 phylogeny=tree,
-                glottocode=taxon.glottocode)
-            i = 0
-            seen = set()
+                description=taxon.glottocode)
+            socpks = []
             for x in taxon.soc_ids:
                 if x in soc_by_id:
                     spk = soc_by_id[x]
-                    if spk not in seen:
-                        i += 1
-                        models.SocietyLabel(ord=i, society_pk=soc_by_id[x], label=label)
-                        seen.add(spk)
+                    if spk not in socpks:
+                        socpks.append(spk)
             for x in taxon.xd_ids:
                 if x in soc_by_xid:
                     for spk in soc_by_xid[x]:
-                        if spk not in seen:
-                            i += 1
-                            models.SocietyLabel(ord=i, society_pk=spk, label=label)
-                            seen.add(spk)
+                        if spk not in socpks:
+                            socpks.append(spk)
+            for i, spk in enumerate(socpks):
+                LanguageTreeLabel(ord=i + 1, language_pk=spk, treelabel=label)
 
         DBSession.add(tree)
         transaction.commit()

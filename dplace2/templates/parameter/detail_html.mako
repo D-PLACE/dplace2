@@ -4,24 +4,9 @@
 <%block name="title">${_('Parameter')} ${ctx.name}</%block>
 <%! import json %>
 
-<%block name="head">
-    % if tree:
-        <link rel="stylesheet" href="${req.static_url('dplace2:static/phylotree.css')}">
-        <script src="//d3js.org/d3.v3.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
-        <script type="text/javascript" src="${req.static_url('dplace2:static/phylotree.js')}"></script>
-    % endif
-</%block>
-
 <div class="row-fluid">
     <div class="span8">
-        <h2>
-            % if tree:
-                <img src="${req.static_url('dplace2:static/Tree_Icon.png')}"
-                     width="35">
-            % endif
-            ${ctx.name}
-        </h2>
+        <h2>${ctx.name}</h2>
         <ul class="nav nav-pills">
             <li class="">
                 <a href="${req.resource_url(ctx) if tree else ''}#map-container">
@@ -37,29 +22,26 @@
                     Table
                 </a>
             </li>
-            % if not tree:
-                <li class="">
-                    <a href="#tree-container">
-                        <img src="${req.static_url('dplace2:static/Tree_Icon.png')}"
-                             width="35">
-                        Tree
-                    </a>
-                </li>
-            % endif
+            <li class="">
+                <a href="#tree-container">
+                    <img src="${req.static_url('dplace2:static/Tree_Icon.png')}"
+                         width="35">
+                    Tree
+                </a>
+            </li>
         </ul>
         % if ctx.description:
             <p>${ctx.description}</p>
         % endif
         <div id="tree-container">
-            % if not tree:
-                <p>
-                    You may display the datapoints for this variable on a given
-                    phylogeny.
-                </p>
-            % endif
-            <form action="${request.resource_url(ctx)}"
+            <p>
+                You may display the datapoints for this variable on a given
+                phylogeny.
+            </p>
+            <form action="${request.route_url('variable_on_tree')}"
                   method="get"
                   class="form-inline">
+                <input type="hidden" name="parameter" value="${ctx.id}"/>
                 <select id="ps" name="phylogeny">
                     <label for="ps">Phylogeny</label>
                     % for tree_ in trees:
@@ -69,18 +51,10 @@
                 <button class="btn" type="submit">Submit</button>
             </form>
         </div>
-        % if tree:
-            <h3>${h.link(req, tree)}</h3>
-            <div class="alert alert-info">
-                The tree has been pruned to only contain leaf nodes with values for the
-                given variable.
-            </div>
-            <svg id="tree_display"></svg>
-        % endif
     </div>
-    <div class="span4"${' data-spy="affix" data-offset-top="10" style="right: 0;"' if tree else ''|n}>
-        % if ctx.domain:
-            <%util:well title="Values">
+    <div class="span4">
+        <%util:well title="Values">
+            % if ctx.domain:
                 <table class="table table-condensed">
                     % for de in ctx.domain:
                         <tr>
@@ -91,9 +65,7 @@
                         </tr>
                     % endfor
                 </table>
-            </%util:well>
-        % elif 'range' in ctx.jsondata or {}:
-            <%util:well title="Values">
+            % elif 'range' in ctx.jsondata or {}:
                 <table>
                     % for number, color in ctx.jsondata['range']:
                         <tr>
@@ -107,36 +79,15 @@
                         </tr>
                     % endfor
                 </table>
-            </%util:well>
-        % endif
+            % endif
+        </%util:well>
     </div>
 </div>
 
-% if not tree:
-    % if map_ or request.map:
-        ${(map_ or request.map).render()}
-    % endif
-
-    <div id="table-container">
-        ${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
-    </div>
+% if map_ or request.map:
+    ${(map_ or request.map).render()}
 % endif
 
-<%block name="javascript">
-% if tree:
-    DPLACE2.labels_in_dplace = ${json.dumps({l.name: [sa.society.name for sa in l.society_assocs] for l in tree.labels if l.society_assocs})|n};
-    DPLACE2.labelColor = ${json.dumps(color_by_label)|n};
-    $(function() {
-    var example_tree = "${newick}";
-    var tree = d3.layout.phylotree().svg(d3.select("#tree_display"))
-    .options({
-    'reroot': false,
-    'brush': false,
-    'align-tips': true,
-    'show-scale': false
-    })
-    .style_nodes(DPLACE2.nodeStyler);
-    tree(example_tree).layout();
-    });
-% endif
-</%block>
+<div id="table-container">
+    ${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
+</div>

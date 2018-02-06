@@ -18,7 +18,8 @@ from clld.db.models.common import (
 )
 from clld.db.models.source import HasSourceNotNullMixin
 
-from dplace2.interfaces import IPhylogeny
+from clld_phylogeny_plugin.interfaces import IPhylogeny
+from clld_phylogeny_plugin.models import Phylogeny
 
 
 class WithSourceMixin(object):
@@ -29,15 +30,9 @@ class WithSourceMixin(object):
 
 
 @implementer(IPhylogeny)
-class Phylogeny(Base, IdNameDescriptionMixin, WithSourceMixin):
-    newick = Column(Unicode)
+class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
+    pk = Column(Integer, ForeignKey('phylogeny.pk'), primary_key=True)
     glottolog = Column(Boolean)
-
-
-class Label(Base, IdNameDescriptionMixin):
-    phylogeny_pk = Column(Integer, ForeignKey('phylogeny.pk'))
-    phylogeny = relationship(Phylogeny, backref='labels')
-    glottocode = Column(Unicode)
 
 
 @implementer(interfaces.IContribution)
@@ -59,16 +54,6 @@ class Society(CustomModelMixin, Language):
     glottocode = Column(Unicode)
     language = Column(Unicode)
     language_family = Column(Unicode)
-
-
-class SocietyLabel(Base):
-    __table_args__ = (UniqueConstraint('society_pk', 'label_pk'),)
-
-    society_pk = Column(Integer, ForeignKey('society.pk'), nullable=False)
-    society = relationship(Society)
-    label_pk = Column(Integer, ForeignKey('label.pk'), nullable=False)
-    label = relationship(Label, backref='society_assocs')
-    ord = Column(Integer, default=1)
 
 
 class Category(Base, IdNameDescriptionMixin):

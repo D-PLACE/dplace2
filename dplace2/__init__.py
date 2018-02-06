@@ -8,11 +8,12 @@ from clld.web.app import CtxFactoryQuery
 from clld.interfaces import ICtxFactoryQuery, IMapMarker
 from clld.db.models import common
 from clld.web.icon import MapMarker
-from clld.web.util.helpers import data_uri
 
 # we must make sure custom models are known at database initialization!
 from dplace2 import models
-from dplace2.interfaces import IPhylogeny
+from dplace2 import interfaces
+from dplace2 import adapters
+from dplace2 import datatables
 
 _ = lambda s: s
 _('Language')
@@ -58,9 +59,8 @@ def main(global_config, **settings):
     }
     config = Configurator(settings=settings)
     config.include('clldmpg')
+    config.include('clld_phylogeny_plugin')
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
-    config.register_resource('phylogeny', models.Phylogeny, IPhylogeny, with_index=True)
-    config.add_route('variable_phylogeny', '/variable_phylogeny')
-    config.add_route('dcombination', '/dcombination')
+    config.add_route('variable_on_tree', '/variable_on_tree')
     return config.make_wsgi_app()

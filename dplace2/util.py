@@ -15,7 +15,6 @@ from clld.web.util.htmllib import HTML
 from clld.web.util.helpers import external_link
 from clld.web.util.multiselect import CombinationMultiSelect
 from purl import URL
-from ete3 import Tree
 
 from dplace2 import models
 
@@ -58,39 +57,9 @@ def combination_detail_html(request=None, context=None, **kw):
 
 
 def parameter_detail_html(context=None, request=None, **kw):
-    res = dict(
-        tree=None,
-        trees=DBSession.query(models.Phylogeny)
-        .order_by(models.Phylogeny.glottolog, models.Phylogeny.name).all())
-
-    if 'phylogeny' in request.params:
-        tree = models.Phylogeny.get(request.params['phylogeny'])
-        color_by_soc = {vs.language_pk: models.get_color(vs) for vs in context.valuesets}
-        color_by_label = {}
-        for label in tree.labels:
-            for sa in label.society_assocs:
-                if sa.society_pk in color_by_soc:
-                    color_by_label[label.name] = color_by_soc[sa.society_pk]
-                    break
-        t = Tree(tree.newick, format=1)
-        nodes = [n.encode('utf8') for n in color_by_label.keys()]
-        try:
-            t.prune(nodes, preserve_branch_length=True)
-        except ValueError as e:
-            if 'Node names not found: [' in e.message:
-                for name in eval('[' + e.message.split('[')[1]):
-                    try:
-                        nodes.remove(name.encode('utf8'))
-                    except ValueError:
-                        pass
-                t.prune(nodes, preserve_branch_length=True)
-            else:
-                raise
-        res.update(
-            tree=models.Phylogeny.get(request.params['phylogeny']),
-            newick=t.write(format=1),
-            color_by_label=color_by_label)
-    return res
+    return dict(
+        trees=DBSession.query(models.DplacePhylogeny)
+        .order_by(models.DplacePhylogeny.glottolog, models.Phylogeny.name).all())
 
 
 def variables_by_category(dataset):

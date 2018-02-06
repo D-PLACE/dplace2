@@ -11,6 +11,7 @@ DPLACE2.style = function (feature) {
 };
 
 CLLD.LayerOptions.regions = {
+    zoomToExtent: false,
     style: DPLACE2.style,
     onEachFeature: function (feature, layer) {
         layer.bindTooltip(feature.properties.REGION_NAM);

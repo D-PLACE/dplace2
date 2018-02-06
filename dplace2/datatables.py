@@ -12,10 +12,11 @@ from clld.db.meta import DBSession
 from clld.db.util import get_distinct_values, icontains
 from clld.db.models import common
 from clld.web.util.htmllib import HTML
+from clld_phylogeny_plugin.datatables import Phylogenies
 
 from dplace2.models import (
     DplaceDataset, Society, Variable, Category, VariableCategory, Datapoint,
-    DatapointReference, Phylogeny,
+    DatapointReference, DplacePhylogeny,
 )
 
 
@@ -176,18 +177,18 @@ class Datapoints(Values):
         ]
 
 
-class Phylogenies(DataTable):
+class DplacePhylogenies(Phylogenies):
     def col_defs(self):
         return [
             LinkCol(self, 'name'),
-            Col(self, 'author', model_col=Phylogeny.author),
-            Col(self, 'year', model_col=Phylogeny.year),
-            Col(self, 'glottolog', model_col=Phylogeny.glottolog),
+            Col(self, 'author', model_col=DplacePhylogeny.author),
+            Col(self, 'year', model_col=DplacePhylogeny.year),
+            Col(self, 'glottolog', model_col=DplacePhylogeny.glottolog),
             Col(self, 'description'),
         ]
 
     def get_options(self):
-        opts = super(Phylogenies, self).get_options()
+        opts = super(DplacePhylogenies, self).get_options()
         opts['aaSorting'] = [[3, 'asc'], [0, 'asc']]
         return opts
 
@@ -197,4 +198,4 @@ def includeme(config):
     config.register_datatable('contributions', Datasets)
     config.register_datatable('parameters', Variables)
     config.register_datatable('values', Datapoints)
-    config.register_datatable('phylogenys', Phylogenies)
+    config.register_datatable('phylogenys', DplacePhylogenies)

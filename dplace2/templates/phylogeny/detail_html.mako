@@ -2,42 +2,68 @@
 <%namespace name="util" file="../util.mako"/>
 <%! active_menu_item = "phylogenys" %>
 <%block name="title">Phylogeny ${ctx.name}</%block>
-<%! import json %>
+<%! from clld_phylogeny_plugin.interfaces import ITree %>
+<% tree = req.registry.queryUtility(ITree)(ctx, req) %>
 
 <%block name="head">
-    <link rel="stylesheet" href="${req.static_url('dplace2:static/phylotree.css')}">
-    <script src="//d3js.org/d3.v3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="${req.static_url('dplace2:static/phylotree.js')}"></script>
+    ${req.registry.queryUtility(ITree)(ctx, req).head(req)|n}
 </%block>
 
-<%def name="sidebar()">
-    <div class="well well-small">
-        <blockquote>
-           ${ctx.reference}
-        </blockquote>
-        % if ctx.url:
-            ${u.ext_link(ctx.url)}
+<div class="row-fluid">
+    <div class="span8">
+        <h2>
+            <img src="${req.static_url('dplace2:static/Tree_Icon.png')}"
+                 width="35">
+            ${title()}
+        </h2>
+        % if tree.parameter:
+            <h3>${h.link(req, tree.parameter)}</h3>
+            <div class="alert alert-info">
+                The tree has been pruned to only contain leaf nodes with values for the
+                given variable.
+            </div>
+        % endif
+        ${tree.render()}
+    </div>
+    <div class="span4">
+        <div class="well well-small">
+            <blockquote>
+                ${ctx.reference}
+            </blockquote>
+            % if ctx.url:
+                ${u.ext_link(ctx.url)}
+            % endif
+        </div>
+        % if tree.parameter:
+            <div class="well-small well" data-spy="affix" data-offset-top="0" style="margin-right: 10px;">
+                <h3>Values</h3>
+                % if tree.parameter.domain:
+                    <table class="table table-condensed">
+                        % for de in tree.parameter.domain:
+                            <tr>
+                                <td>${h.map_marker_img(req, de)}</td>
+                                <td>${de.number}</td>
+                                <td>${de}</td>
+                                <td class="right">${len(de.values)}</td>
+                            </tr>
+                        % endfor
+                    </table>
+                % elif 'range' in tree.parameter.jsondata or {}:
+                    <table>
+                        % for number, color in tree.parameter.jsondata['range']:
+                            <tr>
+                                <td>
+                                    % if loop.first or loop.last:
+                                        ${number}
+                                    % endif
+                                    &nbsp;
+                                </td>
+                                <td style="background-color: ${color}">&nbsp;&nbsp;&nbsp;</td>
+                            </tr>
+                        % endfor
+                    </table>
+                % endif
+            </div>
         % endif
     </div>
-</%def>
-
-<h2>${title()}</h2>
-
-<svg id="tree_display"></svg>
-
-<%block name="javascript">
-    DPLACE2.labels_in_dplace = ${json.dumps({l.name: [sa.society.name for sa in l.society_assocs] for l in ctx.labels if l.society_assocs})|n};
-    $(function() {
-    var example_tree = "${ctx.newick}";
-    var tree = d3.layout.phylotree().svg(d3.select("#tree_display"))
-    .options({
-    'reroot': false,
-    'brush': false,
-    'align-tips': true,
-    'show-scale': false
-    })
-    .style_nodes(DPLACE2.nodeStyler);
-    tree(example_tree).layout();
-    });
-</%block>
+</div>
