@@ -28,6 +28,28 @@
             </form>
         </div>
 
+        <div id="tree-container">
+            <p>
+                You may display the datapoints for this variable combination on a given
+                phylogeny.
+            </p>
+            <form action="${request.route_url('variable_on_tree')}"
+                  method="get"
+                  class="form-inline">
+                <img src="${req.static_url('dplace2:static/Tree_Icon.png')}" width="35"/>
+                % for p in ctx.parameters:
+                    <input type="hidden" name="parameter" value="${p.id}"/>
+                % endfor
+                <select id="ps" name="phylogeny">
+                    <label for="ps">Phylogeny</label>
+                    % for tree_ in trees:
+                        <option value="${tree_.id}"${' selected="selected"' if tree and tree.id == tree_.id else ''}>${tree_.name}</option>
+                    % endfor
+                </select>
+                <button class="btn" type="submit">Submit</button>
+            </form>
+        </div>
+
         % if multivalued:
             <div class="alert alert-info">
                 <strong>Note:</strong> Languages may have multiple values marked with

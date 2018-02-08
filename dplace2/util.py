@@ -53,6 +53,8 @@ def combination_detail_html(request=None, context=None, **kw):
         'params': p,
         'res': q.all(),
         'ms': VariableMultiSelect,
+        'trees': DBSession.query(models.DplacePhylogeny)
+        .order_by(models.DplacePhylogeny.glottolog, models.Phylogeny.name).all()
     }
 
 

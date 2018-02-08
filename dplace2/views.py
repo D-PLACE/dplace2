@@ -8,4 +8,4 @@ from dplace2 import models
 def variable_on_tree(req):
     return HTTPFound(req.resource_url(
         models.DplacePhylogeny.get(req.params['phylogeny']),
-        _query=dict(parameter=req.params['parameter'])))
+        _query=[('parameter', pid) for pid in req.params.getall('parameter')]))

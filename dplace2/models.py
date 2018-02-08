@@ -34,6 +34,11 @@ class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
     pk = Column(Integer, ForeignKey('phylogeny.pk'), primary_key=True)
     glottolog = Column(Boolean)
 
+    @property
+    def citation(self):
+        from clld.web.util.htmllib import HTML
+        return HTML.blockquote(self.reference)
+
 
 @implementer(interfaces.IContribution)
 class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
