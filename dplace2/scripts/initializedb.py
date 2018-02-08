@@ -69,6 +69,8 @@ biomes = {
     '16': '#d5d8e6',
 }
 
+hraf_pattern = re.compile('(?P<name>[^(]+)\((?P<id>[^)/]+)')
+
 
 def valid_id(s):
     return s.replace('.', '_')
@@ -121,6 +123,11 @@ def main(args):
             repos.path('cldf', row.id, 'StructureDataset-metadata.json'))
         try:
             for row in ds['LanguageTable']:
+                #alt_names_by_society
+                if row['HRAF_name_ID']:
+                    hraf_match = hraf_pattern.match(row['HRAF_name_ID'])
+                else:
+                    hraf_match = None
                 data.add(
                     models.Society,
                     row['id'],
@@ -131,7 +138,11 @@ def main(args):
                     longitude=row['Long'],
                     region=regions.get(row['id'], {}).get('name'),
                     dataset=c,
+                    hraf_id=hraf_match.group('id') if hraf_match else None,
+                    hraf_name=hraf_match.group('name') if hraf_match else None,
                     glottocode=row['glottocode'],
+                    year=row['main_focal_year'],
+                    name_in_source=row['ORIG_name_and_ID_in_this_dataset'],
                     language=glottolog[row['glottocode']].name,
                     language_family=glottolog[row['glottocode']].family_name or None,
                 )

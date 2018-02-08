@@ -53,12 +53,22 @@ class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
 class Society(CustomModelMixin, Language):
     pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
     xid = Column(Unicode)
+    name_in_source = Column(Unicode)
     dataset_pk = Column(Integer, ForeignKey('dplacedataset.pk'))
     dataset = relationship(DplaceDataset)
     region = Column(Unicode)
     glottocode = Column(Unicode)
     language = Column(Unicode)
     language_family = Column(Unicode)
+    year = Column(Unicode)
+    hraf_name = Column(Unicode)
+    hraf_id = Column(Unicode)
+
+    @property
+    def hraf_url(self):
+        if self.hraf_id:
+            return 'http://ehrafworldcultures.yale.edu/collection?owc={0}'.format(
+                self.hraf_id)
 
 
 class Category(Base, IdNameDescriptionMixin):

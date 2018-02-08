@@ -23,6 +23,10 @@ body {
     font-family: "DPLACE";
 }
 
+h1, h2, h3, h4, h5, dt {
+    font-weight: 500;
+}
+
 .dplace-map-icon
 {
   border:1px solid black;
