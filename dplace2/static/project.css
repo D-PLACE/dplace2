@@ -1,3 +1,120 @@
+.place {
+   color:  #0a4553;
+    background-color: #0b0d0c;
+}
+
+.environment {
+   color: #50b79c;
+    background-color: #0c9e6d;
+}
+
+.culture {
+   color: #e8552a;
+    background-color: #e21d27;
+}
+
+#map-container {
+    background-image: url(/static/Places_Pattern_transparent.png);
+    background-repeat: repeat;
+    background-size: 400px 400px;
+}
+
+.vtable {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-repeat: repeat;
+    background-size: 400px 400px;
+      padding: 9px;
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+}
+
+.linguistic {
+    background-image: url(/static/Language_Pattern_transparent.png);
+    background-repeat: repeat;
+    background-size: 100px 100px;
+}
+
+.cultural {
+    background-image: url(/static/Culture_Pattern_transparent.png);
+    border: 1px solid #e21d27;
+}
+.environmental {
+    background-image: url(/static/Env_Pattern_transparent.png);
+    border: 1px solid #0c9e6d;
+}
+
+.language {
+    color: #f6a523;
+    background-color:  #ee8122;
+}
+
+.alert-success {
+    color: #169072;
+    background-color: #b1ebdc;
+    border-color: #50b79c;
+}
+
+.alert-success h4 {
+    color: #0c9e6d;
+}
+
+.alert-info {
+    color: #a26400;
+    background-color: #ffbb4e;
+    border-color: #f6a523;
+}
+
+.alert-info h4 {
+    color: #e21d27;
+}
+
+a {
+  color: #0a4553;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #0b0d0c;
+  text-decoration: underline;
+}
+
+.btn-info {
+    color: #ffffff;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    background-color: #50b79c;
+    *background-color: #0c9e6d;
+    background-image: -moz-linear-gradient(top, #50b79c, #0c9e6d);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#50b79c), to(#0c9e6d));
+    background-image: -webkit-linear-gradient(top, #50b79c, #0c9e6d);
+    background-image: -o-linear-gradient(top, #50b79c, #0c9e6d);
+    background-image: linear-gradient(to bottom, #50b79c, #0c9e6d);
+    background-repeat: repeat-x;
+    border-color: #0c9e6d #0c9e6d #0a4553;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff5bc0de', endColorstr='#ff2f96b4', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+
+.btn-info:hover,
+.btn-info:active,
+.btn-info.active,
+.btn-info.disabled,
+.btn-info[disabled] {
+    color: #ffffff;
+    background-color: #0c9e6d !important;
+    *background-color: #0c9e6e !important;
+}
+
+.btn-info:active,
+.btn-info.active {
+    background-color: #0c9e6e \9;
+}
+
+
+
+
 
 @font-face {
     font-family: "DPLACE";

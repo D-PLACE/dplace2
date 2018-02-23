@@ -53,7 +53,8 @@
         </div>
     </div>
     <div class="span4">
-        <%util:well title="Values">
+        <div class="vtable ${ctx.dataset.type}">
+            <h5>Values</h5>
             % if ctx.domain:
                 <table class="table table-condensed">
                     % for de in ctx.domain:
@@ -80,7 +81,8 @@
                     % endfor
                 </table>
             % endif
-        </%util:well>
+
+        </div>
     </div>
 </div>
 

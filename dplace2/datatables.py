@@ -157,6 +157,11 @@ class Datapoints(Values):
                         'language',
                         model_col=common.Language.name,
                         get_object=lambda i: i.valueset.language),
+                Col(self,
+                    'l',
+                    sClass='linguistic',
+                    sTitle='Language family',
+                    model_col=Society.language_family),
                 RefsCol(self, 'source'),
                 LinkToMapCol(self, 'm', get_object=lambda i: i.valueset.language),
             ]
