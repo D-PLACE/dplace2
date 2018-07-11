@@ -19,8 +19,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clld>=4.0.3',
-        'clldmpg',
+        'clld>=4.2.2',
+        'clldmpg>=3.3.1',
         'clld_phylogeny_plugin>=1.0.1',
         'sqlalchemy',
         'waitress',
