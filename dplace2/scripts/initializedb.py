@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import sys
-from itertools import groupby, cycle, chain
+from itertools import groupby, chain
 import re
 from colorsys import hsv_to_rgb
 from collections import defaultdict, OrderedDict
@@ -14,6 +14,7 @@ from clldutils.misc import slug
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
+from clld.lib.color import qualitative_colors
 from clld.lib.bibtex import Database
 from pycldf import StructureDataset
 from pydplace.api import Repos
@@ -23,34 +24,6 @@ from dplace2 import models
 from clld_phylogeny_plugin.models import TreeLabel, LanguageTreeLabel
 
 DATA_REPOS = Path(dplace2.__file__).parent / '..' / '..' / 'dplace-data'
-colorMap = [  # https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
-    '#e6194b',
-    '#3cb44b',
-    '#ffe119',
-    '#0082c8',
-    '#f58231',
-    '#911eb4',
-    '#46f0f0',
-    '#f032e6',
-    '#d2f53c',
-    '#fabebe',
-    '#008080',
-    '#e6beff',
-    '#aa6e28',
-    '#fffac8',
-    '#800000',
-    '#aaffc3',
-    '#808000',
-    '#ffd8b1',
-    '#000080',
-    '#808080',
-    '#FFFFFF',
-    '#000000',
-    '#FF0000',
-    '#00FF00',
-    '#0000FF',
-]
-
 biomes = {
     '01': '#00ff00',
     '02': '#b2e519',
@@ -109,16 +82,16 @@ def main(args):
     regions = repos.read_json('geo', 'societies_tdwg.json')
     glottolog = {
         r.id: r for r in repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
-    dscolors = cycle(colorMap)
+    dscolors = qualitative_colors(len(repos.datasets))
     dss = {}
-    for row in sorted(repos.datasets, key=lambda d: (d.type, d.id)):
+    for i, row in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id))):
         c = data.add(
             models.DplaceDataset,
             row.id,
             id=row.id,
             name=row.name,
             description=row.reference,  # FIXME: we should have a real description!
-            color=next(dscolors),
+            color=dscolors[i],
             type=row.type)
         ds = StructureDataset.from_metadata(
             repos.path('cldf', row.id, 'StructureDataset-metadata.json'))
@@ -187,16 +160,11 @@ def main(args):
                     ds['CodeTable'],
                     key=lambda i: (
                         i['var_id'],
-                        int(i['code']) if re.match('[0-9]+$', i['code']) else i['code'])),
+                        i['code'].rjust(10, '0') if re.match('[0-9]+$', i['code']) else i['code'])),
                 lambda i: i['var_id']
             ):
                 codes = [code for code in codes if code['code'] != 'NA']
-                for i, code in enumerate(codes):
-                    if len(codes) <= len(colorMap):
-                        color = colorMap[i]
-                    else:
-                        color = '#f58231'
-
+                for color, code in zip(qualitative_colors(len(codes)), codes):
                     if var_id == 'EcoRegion':
                         color = biomes[code['code'][1:3]]
                     elif var_id == 'Biome':
@@ -269,7 +237,7 @@ def main(args):
     for cid, ds in dss.items():
         print(cid)
         transaction.begin()
-        seen = set()
+        dsdata = Data()
         c = models.DplaceDataset.get(cid)
 
         societies = {
@@ -299,28 +267,38 @@ def main(args):
                 parameter_pk=variables[valid_id(var_id)],
             )
             for i, row in enumerate(rows):
+                name = row['code']
+                m = year_pattern.match(row['year'] or '')
+                if m:
+                    name += ' ({0})'.format(m.group('year'))
+                if row['sub_case']:
+                    name += ' [{0}]'.format(row['sub_case'])
+
+                vid = '{0}-{1}'.format(vsid, i + 1)
+                v, k = None, None
                 code = codes.get(valid_id('{0}-{1}'.format(var_id, row['code'])))
                 if code:
-                    k = (vsid, code, row['code'])
-                    if k in seen:
-                        print('skipping duplicate value {0}'.format(k))
-                        continue
-                    seen.add(k)
-                vid = '{0}-{1}'.format(vsid, i + 1)
-                m = year_pattern.match(row['year'] or '')
-                try:
-                    fv = float(row['code'])
-                except (TypeError, ValueError):
-                    fv = None
-                v = models.Datapoint(
-                    id=vid,
-                    valueset=vs,
-                    name=row['code'],
-                    comment=row['comment'],
-                    year=int(m.group('year')) if m else None,
-                    sub_case=row['sub_case'],
-                    value_float=fv,
-                    domainelement_pk=code)
+                    k = (vsid, code, name)
+                    v = dsdata['Datapoint'].get(k)
+                    if v:
+                        v.frequency += 1
+                if not v:
+                    try:
+                        fv = float(row['code'])
+                    except (TypeError, ValueError):
+                        fv = None
+                    v = models.Datapoint(
+                        id=vid,
+                        valueset=vs,
+                        name=name,#row['code'],
+                        comment=row['comment'],
+                        year=int(m.group('year')) if m else None,
+                        sub_case=row['sub_case'],
+                        value_float=fv,
+                        frequency=1,
+                        domainelement_pk=code)
+                if code and k:
+                    dsdata['Datapoint'][k] = v
                 for ref in row['references']:
                     sid, _, desc = ref.partition(':')
                     models.DatapointReference(
@@ -356,7 +334,7 @@ def prime_cache(args):
     for var in DBSession.query(models.Variable)\
             .options(joinedload_all(models.Variable.valuesets, common.ValueSet.values))\
             .filter(models.Variable.type == 'Continuous'):
-        values = [float(v.name) for v in chain(*[vs.values for vs in var.valuesets])]
+        values = [v.value_float for v in chain(*[vs.values for vs in var.valuesets])]
         cminimum = minimum = min(values)
         cmaximum = maximum = max(values)
 
@@ -394,9 +372,9 @@ def prime_cache(args):
 
         for vs in var.valuesets:
             for v in vs.values:
-                v.jsondata = {'color': color(cminimum, cmaximum, mlog(float(v.name)) if log else float(v.name))}
+                v.jsondata = {'color': color(cminimum, cmaximum, mlog(v.value_float) if log else float(v.value_float))}
 
-    return
+    #return
     for attr, t in [
         ('count_societies', models.Society),
         ('count_variables', models.Variable)
