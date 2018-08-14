@@ -6,17 +6,29 @@ following a special naming convention which are called to update the template co
 before rendering resource's detail or index views.
 """
 from itertools import chain
+import re
 
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.web.util.htmllib import HTML
-from clld.web.util.helpers import external_link
+from clld.web.util.helpers import external_link, get_referents, link
 from clld.web.util.multiselect import CombinationMultiSelect
 from purl import URL
 
 from dplace2 import models
+
+
+def link_sources(req, value, s=None):
+    s = s if s is not None else (value.comment or '')
+    sources = {ref.source.id: ref.source for ref in value.references if ref.source.id}
+    if sources:
+        return re.sub(
+            '(?P<id>%s)' % '|'.join(re.escape(k) for k in sources),
+            lambda m: link(req, sources[m.group('id')]),
+            s)
+    return s
 
 
 def ext_link(url):
@@ -79,3 +91,7 @@ def variables_by_category(dataset):
         HTML.thead(HTML.tr(HTML.th('category'), HTML.th('# variables'))),
         HTML.tbody(*rows),
         class_='table table-nonfluid table-condensed')
+
+
+def source_detail_html(context=None, request=None, **kw):
+    return {'referents': get_referents(context)}

@@ -57,8 +57,8 @@ ${h.text2html(h.Markup(ctx.markup_description) if ctx.markup_description else ct
         ${h.linked_contributors(request, ctx.contribution)}
         ${h.button('cite', onclick=h.JSModal.show(ctx.contribution.name, request.resource_url(ctx.contribution, ext='md.html')))}
     </dd>
-    <dt class="language">${_('Language')}:</dt>
-    <dd class="language">${h.link(request, ctx.language)}</dd>
+    <dt>${_('Language')}:</dt>
+    <dd>${h.link(request, ctx.language)}</dd>
     <dt class="parameter">${_('Parameter')}:</dt>
     <dd class="parameter">${h.link(request, ctx.parameter)}</dd>
     % if ctx.references or ctx.source:

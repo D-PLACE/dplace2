@@ -14,7 +14,7 @@ from clldutils.misc import slug
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clld.lib.color import qualitative_colors
+from clld.lib.color import qualitative_colors, sequential_colors
 from clld.lib.bibtex import Database
 from pycldf import StructureDataset
 from pydplace.api import Repos
@@ -164,7 +164,10 @@ def main(args):
                 lambda i: i['var_id']
             ):
                 codes = [code for code in codes if code['code'] != 'NA']
-                for color, code in zip(qualitative_colors(len(codes)), codes):
+                colors = qualitative_colors(len(codes))
+                if data['Variable'][var_id].type == 'Ordinal' and 3 <= len(codes) <= 9:
+                    colors = sequential_colors(len(codes))
+                for color, code in zip(colors, codes):
                     if var_id == 'EcoRegion':
                         color = biomes[code['code'][1:3]]
                     elif var_id == 'Biome':

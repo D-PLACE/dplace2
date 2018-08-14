@@ -151,7 +151,10 @@ class Datapoints(Values):
         if self.parameter and self.parameter.domain:
             name_col.choices = [de.name for de in self.parameter.domain]
 
-        res = [name_col]
+        res = [
+            DetailsRowLinkCol(self, 'comment'),
+            name_col
+        ]
 
         if self.parameter:
             if self.parameter.type == 'Continuous':
@@ -183,8 +186,9 @@ class Datapoints(Values):
             ]
 
         return res + [
-            Col(self, 'comment', model_col=Datapoint.comment),
-            Col(self, 'year', model_col=Datapoint.year, sTitle='focal year'),
+            #Col(self, 'comment', model_col=Datapoint.comment),
+            Col(self, 'year', model_col=Datapoint.year, sTitle='focal year', input_size='mini'),
+            Col(self, 'sub_case', model_col=Datapoint.sub_case, sTitle='Subcase'),
         ]
 
 
