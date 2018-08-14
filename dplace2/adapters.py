@@ -58,7 +58,7 @@ class GeoJsonVariable(GeoJsonParameter):
             color = '#ff0000'
         return {
             'color': color,
-            'label': value.domainelement.name if value.domainelement else value.name,
+            'label': value.domainelement.name if value.domainelement else ('{0:,}'.format(value.value_float) if value.value_float else value.name),
         }
 
 

@@ -18,10 +18,6 @@ class LanguagesMap(Map):
                 ),
                 marker=map_marker_img(self.req, ds, marker=self.map_marker)
             )
-        yield Layer(
-            'regions',
-            'TDWG Level 2 Regions',
-            self.req.static_url('dplace2:static/level2.geojson'))
 
     def get_default_options(self):
         return {'hash': True, 'icon_size': 15, 'base_layer': "Esri.WorldPhysical"}

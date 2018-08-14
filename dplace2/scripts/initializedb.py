@@ -3,7 +3,8 @@ import sys
 from itertools import groupby, cycle, chain
 import re
 from colorsys import hsv_to_rgb
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
+import math
 
 import transaction
 from sqlalchemy import func
@@ -338,6 +339,10 @@ def color(minval, maxval, val):
     return '#' + ''.join("{0:02x}".format(int(255*n)) for n in hsv_to_rgb(h/360, 1., 1.))
 
 
+def mlog(n):
+    return math.log(max([n, 0.0001]))
+
+
 def prime_cache(args):
     """If data needs to be denormalized for lookup, do that here.
     This procedure should be separate from the db initialization, because
@@ -351,18 +356,47 @@ def prime_cache(args):
     for var in DBSession.query(models.Variable)\
             .options(joinedload_all(models.Variable.valuesets, common.ValueSet.values))\
             .filter(models.Variable.type == 'Continuous'):
-        minimum = min(float(v.name) for v in chain(*[vs.values for vs in var.valuesets]))
-        maximum = max(float(v.name) for v in chain(*[vs.values for vs in var.valuesets]))
+        values = [float(v.name) for v in chain(*[vs.values for vs in var.valuesets])]
+        cminimum = minimum = min(values)
+        cmaximum = maximum = max(values)
+
+        dist = OrderedDict()
+        step = (maximum - minimum) / 10
+        val = minimum
+        while val < maximum:
+            dist[(val, val + step)] = 0
+            val += step
+
+        for v in sorted(values):
+            for mi, ma in dist.keys():
+                if mi <= v < ma:
+                    dist[(mi, ma)] += 1
+
+        dist = list(dist.values())
+        log = False
+        if dist[0] > (10 * dist[-1]):
+            print(var.name)
+            log = True
+            try:
+                cminimum = mlog(minimum)
+            except ValueError:
+                print(minimum)
+                raise
+            cmaximum = mlog(maximum)
+
+        # check bucket sizes, if skewed towards minimum, use log, if skewed toward maximum, use exp
+
         incr = (maximum - minimum) / 6
         var.jsondata = {
-            'range': [(minimum + i * incr, color(minimum, maximum, minimum + i * incr))
+            'range': [(minimum + i * incr, color(cminimum, cmaximum, (cminimum + i * (cmaximum - cminimum) / 6) if log else minimum + i * incr))
                       for i in range(7)]
         }
 
         for vs in var.valuesets:
             for v in vs.values:
-                v.jsondata = {'color': color(minimum, maximum, float(v.name))}
+                v.jsondata = {'color': color(cminimum, cmaximum, mlog(float(v.name)) if log else float(v.name))}
 
+    return
     for attr, t in [
         ('count_societies', models.Society),
         ('count_variables', models.Variable)

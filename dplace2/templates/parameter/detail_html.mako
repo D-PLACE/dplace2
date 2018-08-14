@@ -72,7 +72,7 @@
                         <tr>
                             <td>
                                 % if loop.first or loop.last:
-                                    ${number}
+                                    ${'{0:,}'.format(number)}
                                 % endif
                                 &nbsp;
                             </td>

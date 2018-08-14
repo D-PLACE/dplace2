@@ -119,6 +119,11 @@ class Societies(Languages):
         return res
 
 
+class FloatCol(Col):
+    def format(self, item):
+        return '{0:,}'.format(item.value_float)
+
+
 class Datapoints(Values):
     def base_query(self, query):
         query = query.join(common.ValueSet).options(
@@ -150,7 +155,7 @@ class Datapoints(Values):
 
         if self.parameter:
             if self.parameter.type == 'Continuous':
-                res = [Col(self, 'value', model_col=Datapoint.value_float)]
+                res = [FloatCol(self, 'value', model_col=Datapoint.value_float)]
             res += [
                 # FIXME: use value_float col!
                 LinkCol(self,

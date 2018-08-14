@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dplace2 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-02-02 12:02+0100\n"
+"POT-Creation-Date: 2018-08-14 15:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,43 +17,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.3\n"
 
-#: dplace2/__init__.py:18
+#: dplace2/__init__.py:19
 msgid "Language"
 msgstr ""
 
-#: dplace2/__init__.py:19
+#: dplace2/__init__.py:20
 msgid "Languages"
 msgstr ""
 
-#: dplace2/__init__.py:20
+#: dplace2/__init__.py:21
 msgid "Contribution"
 msgstr ""
 
-#: dplace2/__init__.py:21
+#: dplace2/__init__.py:22
 msgid "Contributions"
 msgstr ""
 
-#: dplace2/__init__.py:22
+#: dplace2/__init__.py:23
 msgid "Phylogeny"
 msgstr ""
 
-#: dplace2/__init__.py:23
+#: dplace2/__init__.py:24
 msgid "Phylogenys"
 msgstr ""
 
-#: dplace2/__init__.py:24
+#: dplace2/__init__.py:25
 msgid "Parameter"
 msgstr ""
 
-#: dplace2/__init__.py:25
+#: dplace2/__init__.py:26
 msgid "Parameters"
 msgstr ""
 
-#: dplace2/__init__.py:26
+#: dplace2/__init__.py:27
 msgid "DomainElement"
 msgstr ""
 
-#: dplace2/__init__.py:27
+#: dplace2/__init__.py:28
 msgid "DomainElements"
+msgstr ""
+
+#: dplace2/__init__.py:29
+msgid "Value"
+msgstr ""
+
+#: dplace2/__init__.py:30
+msgid "Values"
 msgstr ""
 

@@ -26,6 +26,8 @@ _('Parameter')
 _('Parameters')
 _('DomainElement')
 _('DomainElements')
+_('Value')
+_('Values')
 
 
 class DplaceMapMarker(MapMarker):
