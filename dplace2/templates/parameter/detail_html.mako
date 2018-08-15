@@ -59,7 +59,7 @@
                 <table class="table table-condensed">
                     % for de in ctx.domain:
                         <tr>
-                            <td>${h.map_marker_img(req, de)}</td>
+                            <td>${h.map_marker_img(req, de, width=25, height=25)}</td>
                             <td>${de.number}</td>
                             <td>${de}</td>
                             <td class="right">${len(de.values)}</td>
