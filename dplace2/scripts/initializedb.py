@@ -44,6 +44,22 @@ biomes = {
 }
 
 hraf_pattern = re.compile('(?P<name>[^(]+)\((?P<id>[^)/]+)')
+SHAPES = list('ctfds')
+
+
+def get_batches(codes):
+    try:
+        code_map = {int(code['code']): code['code'] for code in codes}
+        codes = list(code_map.keys())
+    except ValueError:
+        return
+    codes = sorted(codes, key=lambda n: n or 0)
+    if len(codes) > 1 and codes[0] == 10 and codes[1] == 20:
+        res = defaultdict(list)
+        for code in codes:
+            res[code // 10].append(code_map[code])
+        if max(len(v) for v in res.values()) <= len(SHAPES):
+            return [list(zip(v, SHAPES)) for k, v in sorted(res.items())]
 
 
 def valid_id(s):
@@ -164,14 +180,25 @@ def main(args):
                 lambda i: i['var_id']
             ):
                 codes = [code for code in codes if code['code'] != 'NA']
-                colors = qualitative_colors(len(codes))
-                if data['Variable'][var_id].type == 'Ordinal' and 3 <= len(codes) <= 9:
-                    colors = sequential_colors(len(codes))
-                for color, code in zip(colors, codes):
+                batches = get_batches(codes)
+                ncolors = len(batches) if batches else len(codes)
+                colors = qualitative_colors(ncolors)
+                if data['Variable'][var_id].type == 'Ordinal' and 3 <= ncolors <= 9:
+                    colors = sequential_colors(ncolors)
+                if batches:
+                    icons = {}
+                    for batch, color in zip(batches, colors):
+                        for c, shape in batch:
+                            icons[c] = shape + color[1:]
+                    print(icons)
+                else:
+                    icons = dict(zip([c['code'] for c in codes], ['c' + c.replace('#', '') for c in colors]))
+                for code in codes:
+                    icon = icons[code['code']]
                     if var_id == 'EcoRegion':
-                        color = biomes[code['code'][1:3]]
+                        icon = 'c' + biomes[code['code'][1:3]][1:]
                     elif var_id == 'Biome':
-                        color = biomes['{0:02}'.format(int(code['code']))]
+                        icon = 'c' + biomes['{0:02}'.format(int(code['code']))][1:]
 
                     try:
                         number = int(code['code'])
@@ -186,7 +213,7 @@ def main(args):
                         abbr=code['code'],
                         name=code['name'],
                         description=code['description'],
-                        color=color,
+                        icon=icon,
                         parameter_pk=data['Variable'][code['var_id']].pk,
                     )
         except KeyError:

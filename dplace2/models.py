@@ -95,7 +95,7 @@ class VariableCategory(Base):
 @implementer(interfaces.IDomainElement)
 class Code(CustomModelMixin, DomainElement):
     pk = Column(Integer, ForeignKey('domainelement.pk'), primary_key=True)
-    color = Column(Unicode)
+    icon = Column(Unicode)
 
 
 @implementer(interfaces.IValue)
@@ -115,23 +115,23 @@ class DatapointReference(Base, HasSourceNotNullMixin):
     value = relationship(Value, innerjoin=True, backref="references")
 
 
-def get_color(ctx):
-    color = None
+def get_icon(ctx):
+    icon = None
     if isinstance(ctx, ValueSet):
         value = ctx.values[0]
         if value.domainelement:
-            color = value.domainelement.color
+            icon = value.domainelement.icon
         elif 'color' in value.jsondata or {}:
-            color = value.jsondata['color']
+            icon = 'c' + value.jsondata['color'][1:]
     elif isinstance(ctx, Value):
         if ctx.domainelement:
-            color = ctx.domainelement.color
+            icon = ctx.domainelement.icon
         elif 'color' in ctx.jsondata or {}:
-            color = ctx.jsondata['color']
+            icon = 'c' + ctx.jsondata['color'][1:]
     elif isinstance(ctx, DomainElement):
-        color = ctx.color
+        icon = ctx.icon
     elif isinstance(ctx, Language):
-        color = ctx.dataset.color
+        icon = 'c' + ctx.dataset.color[1:]
     elif isinstance(ctx, Contribution):
-        color = ctx.color
-    return color
+        icon = 'c' + ctx.color[1:]
+    return icon

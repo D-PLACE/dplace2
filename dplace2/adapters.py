@@ -6,24 +6,12 @@ from clld.web.adapters.geojson import GeoJson, GeoJsonParameter
 from clld_phylogeny_plugin.tree import Tree
 from clld_phylogeny_plugin.interfaces import ITree
 
-from dplace2.models import get_color
-
-
-
-
-#            dl = []
-#            for ds, langs in groupby(
-#                sorted(label.languages, key=lambda l: (l.dataset_pk, l.name)),
-#                lambda l: l.dataset
-#            ):
-#                dl.append(HTML.dt(link(self.req, ds)))
-#                dl.append(HTML.dd(*[HTML.li(link(self.req, l)) for l in langs]))
-#            res['tooltip'] = HTML.dl(*dl)
+from dplace2.models import get_icon
 
 
 class VariableTree(Tree):
     def get_marker(self, valueset):
-        return 'c', get_color(valueset)
+        return get_icon(valueset)
 
 
 class GeoJsonSocieties(GeoJson):
@@ -50,14 +38,7 @@ class GeoJsonVariable(GeoJsonParameter):
 
     def feature_properties(self, ctx, req, valueset):
         value = valueset.values[0]
-        if value.domainelement:
-            color = value.domainelement.color
-        elif 'color' in value.jsondata or {}:
-            color = value.jsondata['color']
-        else:
-            color = '#ff0000'
         return {
-            'color': color,
             'label': value.domainelement.name if value.domainelement else ('{0:,}'.format(value.value_float) if value.value_float else value.name),
         }
 
