@@ -29,11 +29,14 @@ While D-PLACE is designed to be expandable, most of the initial cultural data in
 </p>
 
 <p>
-The D-PLACE team is made up of scientists with a broad range of interests who share a passion for interdisciplinary inquiry.
+    The
+    <a href="${req.route_url('about', _anchor='team')}">D-PLACE team</a>
+    is made up of scientists with a broad range of interests who share a passion for interdisciplinary inquiry.
 </p>
 
 <p>
-More information on: citing D-PLACE, related publications, and the technology and source code.
+    More information on: <a href="${req.route_url('about', _anchor='howtocite')}">citing D-PLACE</a> and
+    <a href="${req.route_url('about', _anchor='publications')}">related publications</a>.
 </p>
 
 <p>

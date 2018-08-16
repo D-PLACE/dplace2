@@ -43,6 +43,7 @@ class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
 @implementer(interfaces.IContribution)
 class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     pk = Column(Integer, ForeignKey('contribution.pk'), primary_key=True)
+    reference = Column(Unicode)
     type = Column(Unicode)
     count_societies = Column(Integer)
     count_variables = Column(Integer)

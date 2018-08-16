@@ -5,12 +5,16 @@
 <%def name="sidebar()">
     <div class="well well-small">
         <h4>Source</h4>
-        <p>${ctx.description}</p>
+        <p>${ctx.reference}</p>
     </div>
 </%def>
 
 
 <h2>${_('Contribution')} ${ctx.name}</h2>
+
+% if ctx.description:
+    <p>${ctx.description}</p>
+% endif
 
 <div class="tabbable">
     <ul class="nav nav-tabs">

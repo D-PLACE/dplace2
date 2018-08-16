@@ -106,7 +106,8 @@ def main(args):
             row.id,
             id=row.id,
             name=row.name,
-            description=row.reference,  # FIXME: we should have a real description!
+            description=row.description,
+            reference=row.reference,  # FIXME: we should have a real description!
             color=dscolors[i],
             type=row.type)
         ds = StructureDataset.from_metadata(

@@ -186,7 +186,7 @@ class Datapoints(Values):
             ]
 
         return res + [
-            Col(self, 'comment', model_col=Datapoint.comment),
+            #Col(self, 'comment', model_col=Datapoint.comment),
             Col(self, 'year', model_col=Datapoint.year, sTitle='focal year', input_size='mini'),
             Col(self, 'sub_case', model_col=Datapoint.sub_case, sTitle='Subcase'),
         ]
