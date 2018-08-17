@@ -7,8 +7,9 @@ before rendering resource's detail or index views.
 """
 from itertools import chain
 import re
+from collections import Counter
 
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from sqlalchemy.orm import aliased
 from clld.db.meta import DBSession
 from clld.db.models import common
@@ -42,6 +43,38 @@ def language_detail_html(request=None, context=None, **kw):
         .filter(common.LanguageSource.language_pk == context.pk)
         .order_by(common.Source.name)
         .all()}
+
+
+def contribution_detail_html(request=None, context=None, **kw):
+    cats = DBSession.execute("""\
+SELECT
+    c.name, count(v.pk) as vs FROM category AS c, variablecategory AS vc, variable AS v
+WHERE
+    c.pk = vc.category_pk AND vc.variable_pk = v.pk AND v.dataset_pk = {0}
+GROUP BY
+    c.name
+ORDER BY vs DESC
+""".format(context.pk))
+    years = (r[0] for r in DBSession.query(models.Datapoint.year)
+        .join(common.ValueSet)
+        .filter(common.ValueSet.contribution_pk == context.pk))
+
+    def batch(y):
+        if not y:
+            return (5, 'NA')
+        if y > 1950:
+            return (4, 'after 1950')
+        if y >= 1900:
+            return (3, '1900 - 1950')
+        if y >= 1800:
+            return (2, '1800 - 1899')
+        return (1, 'before 1800')
+
+    years = Counter(map(batch, years))
+    return {
+        'focal_years': [(k[1], int(n / sum(years.values()) * 100)) for k, n in sorted(years.items())],
+        'categories': list(cats)
+    }
 
 
 class VariableMultiSelect(CombinationMultiSelect):

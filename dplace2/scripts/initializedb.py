@@ -76,12 +76,12 @@ def main(args):
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
         publisher_url="http://www.shh.mpg.de",
-        license="http://creativecommons.org/licenses/by/4.0/",
+        license="http://creativecommons.org/licenses/by-nc/4.0/",
         contact='dplace@shh.mpg.de',
         domain='dplace2.clld.org',
         jsondata={
-            'license_icon': 'cc-by.png',
-            'license_name': 'Creative Commons Attribution 4.0 International License'})
+            'license_icon': 'cc-by-nc.png',
+            'license_name': 'Creative Commons Attribution-NonCommercial 4.0 International License'})
 
     for i, (id_, name) in enumerate([
         ('kirbykate', 'Kate Kirby'),

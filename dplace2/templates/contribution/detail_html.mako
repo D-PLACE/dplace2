@@ -7,6 +7,46 @@
         <h4>Source</h4>
         <p>${ctx.reference}</p>
     </div>
+    <div class="well well-small">
+        <h4>Focal time period</h4>
+        <table class="table table-condensed table-nonfluid">
+            <thead>
+            <tr>
+                <th>Period</th>
+                <th>% of datapoints</th>
+            </tr>
+            </thead>
+            <tbody>
+                % for label, percent in focal_years:
+                <tr>
+                    <td>${label}</td>
+                    <td class="right">${percent}</td>
+                </tr>
+                % endfor
+
+            </tbody>
+        </table>
+    </div>
+    <div class="well well-small">
+        <h4>Variables by category</h4>
+        <table class="table table-condensed table-nonfluid">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>number of variables</th>
+            </tr>
+            </thead>
+            <tbody>
+                % for category, count in categories:
+                    <tr>
+                        <td>${category}</td>
+                        <td class="right">${count}</td>
+                    </tr>
+                % endfor
+
+            </tbody>
+        </table>
+    </div>
 </%def>
 
 

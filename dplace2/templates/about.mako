@@ -1,8 +1,23 @@
 <%inherit file="home_comp.mako"/>
+<%namespace name="util" file="util.mako"/>
+
+<%def name="sidebar()">
+    <div class="well well-small">
+        <h4>Contents</h4>
+        <ul class="unstyled">
+            <li><a href="#howtocite">How to cite</a></li>
+            <li><a href="#funding">Funding</a></li>
+            <li><a href="#acknowledgements">Acknowledgements</a></li>
+            <li><a href="#publications">Publications</a></li>
+            <li><a href="#team">The Team</a></li>
+            ##<li><a href="#"></a></li>
+        </ul>
+    </div>
+</%def>
 
 <h2>About D-PLACE</h2>
 
-<h3 id="howtocite">How to cite</h3>
+<%util:section title="How to cite" level="3" id="howtocite">
 
 <p>
     Research that uses data from D-PLACE should cite the following paper:
@@ -19,19 +34,20 @@ Kirby, K.R., Gray, R. D., Greenhill, S. J., Jordan, F. M., Gomes-Ng, S., Bibiko,
 </blockquote>
 
 <p>
-    Users should also cite the original source(s) of the data.
+    Users should also cite the original <a href="#sources">source(s)</a> of the data.
 </p>
+</%util:section>
 
-<h3>Funding</h3>
-
+<%util:section title="Funding" level="3" id="funding">
 <p>
     D-PLACE was developed with generous support from the
     ${h.external_link('http://www.nescent.org', label='National Evolutionary Synthesis Center')}
     and the
     ${h.external_link('https://www.shh.mpg.de/en', label='Max Planck Institute for the Science of Human History')}.
 </p>
+</%util:section>
 
-<h3>Acknowledgements</h3>
+<%util:section title="Acknowledgements" level="3" id="acknowledgements">
 <p>
     D-PLACE would not exist without the cultural datasets upon which it relies;
     we would like to acknowledge the years of work by George P. Murdock and Lewis R. Binford,
@@ -54,18 +70,22 @@ Kirby, K.R., Gray, R. D., Greenhill, S. J., Jordan, F. M., Gomes-Ng, S., Bibiko,
 <p>
     We are grateful to the Max Planck Institute for its commitment to provide long-term hosting for D-PLACE.
 </p>
+</%util:section>
 
-<h3 id="publications">Publications</h3>
+<%util:section title="Publications" level="3" id="publications">
 
 <ul>
     <li>Kirby, K.R., Gray, R. D., Greenhill, S. J., Jordan, F. M., Gomes-Ng, S., Bibiko, H-J, et al. (2016). D-PLACE: A Global Database of Cultural, Linguistic and Environmental Diversity. PLoS ONE, 11(7): e0158391. <a href="https://doi.org/10.1371/journal.pone.0158391">doi:10.1371/journal.pone.0158391</a>.</li>
     <li>Botero, C. A., Gardner, B., Kirby, K. R., Bulbulia, J., Gavin, M. C., & Gray, R. D. (2014). The ecology of religious beliefs. Proceedings of the National Academy of Sciences, 111(47), 16784-16789.</li>
 </ul>
 
+</%util:section>
 
-<h3 id="team">The Team</h3>
 
-</div>
+
+
+
+<%util:section title="The Team" level="3" id="team">
     <div class="row-fluid">
         <div class="span3" style="text-align: right">
             <img class="img-polaroid" width="150px" src="${req.static_url('dplace2:static/team/team_bibiko.jpg')}">
@@ -219,5 +239,5 @@ Kirby, K.R., Gray, R. D., Greenhill, S. J., Jordan, F. M., Gomes-Ng, S., Bibiko,
         </ul>
     </div>
 </div>
+</%util:section>
 
-<div class="row-fluid">
