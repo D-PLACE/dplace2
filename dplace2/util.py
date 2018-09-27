@@ -21,6 +21,10 @@ from purl import URL
 from dplace2 import models
 
 
+def phylogeny_detail_html(request=None, context=None, **kw):
+    return {'ms': CombinationMultiSelect}
+
+
 def link_sources(req, value, s=None):
     s = s if s is not None else (value.comment or '')
     sources = {ref.source.id: ref.source for ref in value.references if ref.source.id}

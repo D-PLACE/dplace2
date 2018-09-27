@@ -12,7 +12,7 @@ from dplace2.models import get_icon
 class VariableTree(Tree):
     def get_marker(self, valueset):
         icon = get_icon(valueset)
-        return 'c', '#' + icon[1:]
+        return icon[:1], '#' + icon[1:]
 
 
 class GeoJsonSocieties(GeoJson):
