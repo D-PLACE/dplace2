@@ -182,7 +182,7 @@ class Datapoints(Values):
                         sTitle=self.req.translate('Parameter'),
                         model_col=common.Parameter.name,
                         get_object=lambda i: i.valueset.parameter),
-                RefsCol(self, 'source'),
+                #RefsCol(self, 'source'),
             ]
 
         return res + [

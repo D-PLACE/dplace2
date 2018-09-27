@@ -3,11 +3,27 @@
 <%! active_menu_item = "contributions" %>
 <%block name="title">${_('Contributions')}</%block>
 
+
+<ul class="nav nav-pills" style="float: right">
+    <li class="">
+        <a href="#table-container">
+            <img src="${req.static_url('dplace2:static/Table_Icon.png')}" width="35">
+            Table
+        </a>
+    </li>
+    <li class="">
+        <a href="#sources">
+            <img src="${req.static_url('dplace2:static/DataSet_Icon.png')}" width="35">
+            Sources
+        </a>
+    </li>
+</ul>
+
 <h2>${_('Contributions')}</h2>
-<div>
+
+<div id="table-container">
     ${ctx.render()}
 </div>
-
 
 <%util:section title="Sources" level="3" id="sources">
     <p>

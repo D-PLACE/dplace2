@@ -16,7 +16,6 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.color import qualitative_colors, sequential_colors
 from clld.lib.bibtex import Database
-from pycldf import StructureDataset
 from pydplace.api import Repos
 
 import dplace2
@@ -41,15 +40,15 @@ biomes = {
     '14': '#9f21a3',
     '15': '#ffffff',
     '16': '#d5d8e6',
+    '99': '#000000',
 }
 
-hraf_pattern = re.compile('(?P<name>[^(]+)\((?P<id>[^)/]+)')
 SHAPES = list('ctfds')
 
 
 def get_batches(codes):
     try:
-        code_map = {int(code['code']): code['code'] for code in codes}
+        code_map = {int(code.code): code.code for code in codes}
         codes = list(code_map.keys())
     except ValueError:
         return
@@ -75,7 +74,7 @@ def main(args):
         name="D-PLACE",
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
-        publisher_url="http://www.shh.mpg.de",
+        publisher_url="https://www.shh.mpg.de",
         license="http://creativecommons.org/licenses/by-nc/4.0/",
         contact='dplace@shh.mpg.de',
         domain='dplace2.clld.org',
@@ -100,125 +99,119 @@ def main(args):
         r.id: r for r in repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
     dscolors = qualitative_colors(len(repos.datasets))
     dss = {}
-    for i, row in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id))):
-        c = data.add(
+    altname_count = 0
+    for i, ds in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id))):
+        dataset = data.add(
             models.DplaceDataset,
-            row.id,
-            id=row.id,
-            name=row.name,
-            description=row.description,
-            reference=row.reference,  # FIXME: we should have a real description!
+            ds.id,
+            id=ds.id,
+            name=ds.name,
+            description=ds.description,
+            reference=ds.reference,  # FIXME: we should have a real description!
             color=dscolors[i],
-            type=row.type)
-        ds = StructureDataset.from_metadata(
-            repos.path('cldf', row.id, 'StructureDataset-metadata.json'))
-        try:
-            for row in ds['LanguageTable']:
-                #alt_names_by_society
-                if row['HRAF_name_ID']:
-                    hraf_match = hraf_pattern.match(row['HRAF_name_ID'])
-                else:
-                    hraf_match = None
+            type=ds.type)
+        for soc in ds.societies:
+            s = data.add(
+                models.Society,
+                soc.id,
+                id=soc.id,
+                xid=soc.xd_id,
+                name=soc.pref_name_for_society,
+                latitude=soc.Lat,
+                longitude=soc.Long,
+                region=regions.get(soc.id, {}).get('name'),
+                dataset=dataset,
+                hraf_id=soc.HRAF_name_ID.id if soc.HRAF_name_ID else None,
+                hraf_name=soc.HRAF_name_ID.name if soc.HRAF_name_ID else None,
+                glottocode=soc.glottocode,
+                year=soc.main_focal_year,
+                name_in_source=soc.ORIG_name_and_ID_in_this_dataset,
+                language=glottolog[soc.glottocode].name,
+                language_family=glottolog[soc.glottocode].family_name or None,
+            )
+            for n in soc.alt_names_by_society:
+                altname_count += 1
+                common.LanguageIdentifier(
+                    language=s,
+                    identifier=common.Identifier(name=n, type='Other names', id=str(altname_count)))
+
+        for row in ds.variables:
+            v = data.add(
+                models.Variable,
+                row.id,
+                id=valid_id(row.id),
+                name='{0} [{1}]'.format(row.title, row.id),
+                description=row.definition,
+                type=row.type,
+                dataset=dataset,
+            )
+            for cat in set(row.category):
+                obj = data['Category'].get(slug(cat))
+                if not obj:
+                    obj = data.add(models.Category, slug(cat), id=slug(cat), name=cat)
+                DBSession.add(models.VariableCategory(variable=v, category=obj))
+
+            codes = [code for code in row.codes if code.code != 'NA']
+            batches = get_batches(codes)
+            ncolors = len(batches) if batches else len(codes)
+            colors = qualitative_colors(ncolors)
+            if v.type == 'Ordinal' and 3 <= ncolors <= 9:
+                colors = sequential_colors(ncolors)
+            if batches:
+                icons = {}
+                for batch, color in zip(batches, colors):
+                    for c, shape in batch:
+                        icons[c] = shape + color[1:]
+                print(icons)
+            else:
+                icons = dict(zip([c.code for c in codes], ['c' + c.replace('#', '') for c in colors]))
+            for code in codes:
+                icon = icons[code.code]
+                if v.id == 'EcoRegion':
+                    icon = 'c' + biomes[code.code[1:3]][1:]
+                elif v.id == 'Biome':
+                    icon = 'c' + biomes['{0:02}'.format(int(code.code))][1:]
+
+                try:
+                    number = int(code.code)
+                except ValueError:
+                    number = None
+
                 data.add(
-                    models.Society,
-                    row['id'],
-                    id=row['id'],
-                    xid=row['xd_id'],
-                    name=row['pref_name_for_society'],
-                    latitude=row['Lat'],
-                    longitude=row['Long'],
-                    region=regions.get(row['id'], {}).get('name'),
-                    dataset=c,
-                    hraf_id=hraf_match.group('id') if hraf_match else None,
-                    hraf_name=hraf_match.group('name') if hraf_match else None,
-                    glottocode=row['glottocode'],
-                    year=row['main_focal_year'],
-                    name_in_source=row['ORIG_name_and_ID_in_this_dataset'],
-                    language=glottolog[row['glottocode']].name,
-                    language_family=glottolog[row['glottocode']].family_name or None,
+                    models.Code,
+                    (v.id, code.code),
+                    id=valid_id('{0}-{1}'.format(code.var_id, code.code)),
+                    number=number,
+                    abbr=code.code,
+                    name=code.name,
+                    description=code.description,
+                    icon=icon,
+                    parameter=v,
                 )
-        except KeyError:
-            # Dataset does not provide any societies
-            pass
 
-        try:
-            for row in ds['ParameterTable']:
-                v = data.add(
-                    models.Variable,
-                    row['id'],
-                    id=valid_id(row['id']),
-                    name='{0} [{1}]'.format(row['title'], row['id']),
-                    description=row['definition'],
-                    type=row['type'],
-                    dataset=c,
-                )
-                for cat in set(row['category']):
-                    obj = data['Category'].get(cat)
-                    if not obj:
-                        obj = data.add(models.Category, cat, id=slug(cat), name=cat)
-                    DBSession.add(models.VariableCategory(variable=v, category=obj))
-
-        except KeyError:
-            # Dataset does not provide any variables
-            pass
-
-        dss[c.id] = ds
-        #
-        # Testing
-        #
-        #break
+        dss[dataset.id] = ds
 
     DBSession.flush()
 
-    for cid, ds in dss.items():
-        try:
-            for var_id, codes in groupby(
-                sorted(
-                    ds['CodeTable'],
-                    key=lambda i: (
-                        i['var_id'],
-                        i['code'].rjust(10, '0') if re.match('[0-9]+$', i['code']) else i['code'])),
-                lambda i: i['var_id']
-            ):
-                codes = [code for code in codes if code['code'] != 'NA']
-                batches = get_batches(codes)
-                ncolors = len(batches) if batches else len(codes)
-                colors = qualitative_colors(ncolors)
-                if data['Variable'][var_id].type == 'Ordinal' and 3 <= ncolors <= 9:
-                    colors = sequential_colors(ncolors)
-                if batches:
-                    icons = {}
-                    for batch, color in zip(batches, colors):
-                        for c, shape in batch:
-                            icons[c] = shape + color[1:]
-                    print(icons)
+    for ds in dss.values():
+        for relsocs in ds.society_relations:
+            soc = data['Society'][relsocs.id]
+            for relsoc in relsocs.related:
+                if relsoc.dataset in dss and relsoc.id in data['Society']:
+                    # A relation between two societies in D-PLACE!
+                    DBSession.add(
+                        models.SocietyRelation(from_pk=soc.pk, to_pk=data['Society'][relsoc.id].pk))
                 else:
-                    icons = dict(zip([c['code'] for c in codes], ['c' + c.replace('#', '') for c in colors]))
-                for code in codes:
-                    icon = icons[code['code']]
-                    if var_id == 'EcoRegion':
-                        icon = 'c' + biomes[code['code'][1:3]][1:]
-                    elif var_id == 'Biome':
-                        icon = 'c' + biomes['{0:02}'.format(int(code['code']))][1:]
-
-                    try:
-                        number = int(code['code'])
-                    except ValueError:
-                        number = None
-
-                    data.add(
-                        models.Code,
-                        (var_id, code['code']),
-                        id=valid_id('{0}-{1}'.format(code['var_id'], code['code'])),
-                        number=number,
-                        abbr=code['code'],
-                        name=code['name'],
-                        description=code['description'],
-                        icon=icon,
-                        parameter_pk=data['Variable'][code['var_id']].pk,
-                    )
-        except KeyError:
-            pass
+                    # An external relation; we just add a LanguageIdentifier
+                    identifier = data['Identifier'].get((relsoc.dataset, relsoc.id))
+                    if not identifier:
+                        identifier = data.add(
+                            common.Identifier,
+                            (relsoc.dataset, relsoc.id),
+                            id='{0}-{1}'.format(relsoc.dataset, relsoc.id),
+                            name='{0}'.format(relsoc),
+                            type=relsoc.dataset)
+                    DBSession.add(common.LanguageIdentifier(language=soc, identifier=identifier))
 
     transaction.commit()
 
@@ -281,10 +274,9 @@ def main(args):
             k: v for k, v in DBSession.query(common.Source.id, common.Source.pk)}
 
         for (var_id, soc_id), rows in groupby(
-            sorted(ds['ValueTable'], key=lambda r: (r['var_id'], r['soc_id'])),
-            lambda r: (r['var_id'], r['soc_id'])
+            sorted(ds.data, key=lambda r: (r.var_id, r.soc_id)), lambda r: (r.var_id, r.soc_id)
         ):
-            rows = [row for row in rows if row['code'] != 'NA']
+            rows = [row for row in rows if row.code != 'NA']
             if not rows:
                 continue
 
@@ -298,16 +290,16 @@ def main(args):
                 parameter_pk=variables[valid_id(var_id)],
             )
             for i, row in enumerate(rows):
-                name = row['code']
-                m = year_pattern.match(row['year'] or '')
+                name = row.code
+                m = year_pattern.match(row.year or '')
                 if m:
                     name += ' ({0})'.format(m.group('year'))
-                if row['sub_case']:
-                    name += ' [{0}]'.format(row['sub_case'])
+                if row.sub_case:
+                    name += ' [{0}]'.format(row.sub_case)
 
                 vid = '{0}-{1}'.format(vsid, i + 1)
                 v, k = None, None
-                code = codes.get(valid_id('{0}-{1}'.format(var_id, row['code'])))
+                code = codes.get(valid_id('{0}-{1}'.format(var_id, row.code)))
                 if code:
                     k = (vsid, code, name)
                     v = dsdata['Datapoint'].get(k)
@@ -315,25 +307,24 @@ def main(args):
                         v.frequency += 1
                 if not v:
                     try:
-                        fv = float(row['code'])
+                        fv = float(row.code)
                     except (TypeError, ValueError):
                         fv = None
                     v = models.Datapoint(
                         id=vid,
                         valueset=vs,
                         name=name,#row['code'],
-                        comment=row['comment'],
+                        comment=row.comment,
                         year=int(m.group('year')) if m else None,
-                        sub_case=row['sub_case'],
+                        sub_case=row.sub_case,
                         value_float=fv,
                         frequency=1,
                         domainelement_pk=code)
                 if code and k:
                     dsdata['Datapoint'][k] = v
-                for ref in row['references']:
-                    sid, _, desc = ref.partition(':')
+                for ref in row.references:
                     models.DatapointReference(
-                        value=v, source_pk=sources[sid], description=desc or None)
+                        value=v, source_pk=sources[ref.key], description=ref.pages or None)
         transaction.commit()
 
 
@@ -369,7 +360,7 @@ def prime_cache(args):
         cminimum = minimum = min(values)
         cmaximum = maximum = max(values)
 
-        dist = OrderedDict()
+        dist = OrderedDict()  # We compute the distribution of values on equidistant intervals.
         step = (maximum - minimum) / 10
         val = minimum
         while val < maximum:
@@ -384,17 +375,16 @@ def prime_cache(args):
         dist = list(dist.values())
         log = False
         if dist[0] > (10 * dist[-1]):
+            # If there are a lot more values in the first bucket in comparison to the last one,
+            # we assume a logarithmic scale.
             print(var.name)
             log = True
-            try:
-                cminimum = mlog(minimum)
-            except ValueError:
-                print(minimum)
-                raise
+            cminimum = mlog(minimum)
             cmaximum = mlog(maximum)
-
-        # check bucket sizes, if skewed towards minimum, use log, if skewed toward maximum, use exp
-
+        #
+        # FIXME: If the distribution is skewed towards the higher values, we may assume an
+        # exponential scale!
+        #
         incr = (maximum - minimum) / 6
         var.jsondata = {
             'range': [(minimum + i * incr, color(cminimum, cmaximum, (cminimum + i * (cmaximum - cminimum) / 6) if log else minimum + i * incr))
@@ -405,7 +395,6 @@ def prime_cache(args):
             for v in vs.values:
                 v.jsondata = {'color': color(cminimum, cmaximum, mlog(v.value_float) if log else float(v.value_float))}
 
-    #return
     for attr, t in [
         ('count_societies', models.Society),
         ('count_variables', models.Variable)

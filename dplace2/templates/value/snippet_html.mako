@@ -1,10 +1,16 @@
 <%inherit file="../snippet.mako"/>
 <%namespace name="util" file="../util.mako"/>
 
-% if ctx.valueset.description:
-<p>${h.text2html(h.Markup(ctx.valueset.markup_description) if ctx.valueset.markup_description else ctx.valueset.description)}</p>
+% if ctx.comment:
+    % for line in (ctx.comment or '').split('\n'):
+        <p>${u.link_sources(request, ctx, s=line)|n}</p>
+    % endfor
 % endif
 
-% for line in (ctx.comment or '').split('\n'):
-    <p>${u.link_sources(request, ctx, s=line)|n}</p>
-% endfor
+% if ctx.references:
+    <p>
+        <strong>Sources:</strong>
+        ${h.linked_references(request, ctx)}
+    </p>
+% endif
+

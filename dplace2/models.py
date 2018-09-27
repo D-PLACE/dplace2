@@ -9,6 +9,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
 
 from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin
@@ -50,6 +51,11 @@ class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     color = Column(Unicode)
 
 
+class SocietyRelation(Base):
+    from_pk = Column(Integer, ForeignKey('society.pk'))
+    to_pk = Column(Integer, ForeignKey('society.pk'))
+
+
 @implementer(interfaces.ILanguage)
 class Society(CustomModelMixin, Language):
     pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
@@ -64,6 +70,14 @@ class Society(CustomModelMixin, Language):
     year = Column(Unicode)
     hraf_name = Column(Unicode)
     hraf_id = Column(Unicode)
+
+    @declared_attr
+    def related(cls):
+        return relationship(
+            cls,
+            secondary=SocietyRelation.__table__,
+            primaryjoin=cls.pk==SocietyRelation.from_pk,
+            secondaryjoin=cls.pk==SocietyRelation.to_pk)
 
     @property
     def hraf_url(self):
