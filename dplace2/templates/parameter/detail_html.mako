@@ -31,9 +31,12 @@
             </li>
         </ul>
         % if ctx.description:
-            <p>${ctx.description}</p>
+            <div class="alert alert-success">
+                <h4>Definition in ${h.link(request, ctx.dataset)}:</h4>
+                ${ctx.description}
+            </div>
         % endif
-        <div id="tree-container">
+        <div id="tree-container" class="well well-small">
             <p>
                 You may display the datapoints for this variable on a given
                 phylogeny.

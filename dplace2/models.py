@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 
 from clld import interfaces
-from clld.db.meta import Base, CustomModelMixin
+from clld.db.meta import Base, CustomModelMixin, PolymorphicBaseMixin
 from clld.db.models.common import (
     Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin, Value,
     ValueSet,
@@ -22,12 +22,20 @@ from clld.db.models.source import HasSourceNotNullMixin
 from clld_phylogeny_plugin.interfaces import IPhylogeny
 from clld_phylogeny_plugin.models import Phylogeny
 
+from dplace2.interfaces import ISocietyset
+
 
 class WithSourceMixin(object):
     year = Column(Integer)
     author = Column(Unicode)
     url = Column(Unicode)
     reference = Column(Unicode)
+
+
+@implementer(ISocietyset)
+class Societyset(Base, PolymorphicBaseMixin, IdNameDescriptionMixin, WithSourceMixin):
+    color = Column(Unicode)
+    count_societies = Column(Integer)
 
 
 @implementer(IPhylogeny)
@@ -48,7 +56,6 @@ class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     type = Column(Unicode)
     count_societies = Column(Integer)
     count_variables = Column(Integer)
-    color = Column(Unicode)
 
 
 class SocietyRelation(Base):
@@ -61,8 +68,8 @@ class Society(CustomModelMixin, Language):
     pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
     xid = Column(Unicode)
     name_in_source = Column(Unicode)
-    dataset_pk = Column(Integer, ForeignKey('dplacedataset.pk'))
-    dataset = relationship(DplaceDataset)
+    societyset_pk = Column(Integer, ForeignKey('societyset.pk'))
+    societyset = relationship(Societyset, backref='societies')
     region = Column(Unicode)
     glottocode = Column(Unicode)
     language = Column(Unicode)
@@ -146,7 +153,7 @@ def get_icon(ctx):
     elif isinstance(ctx, DomainElement):
         icon = ctx.icon
     elif isinstance(ctx, Language):
-        icon = 'c' + ctx.dataset.color[1:]
-    elif isinstance(ctx, Contribution):
+        icon = 'c' + ctx.societyset.color[1:]
+    elif isinstance(ctx, Societyset):
         icon = 'c' + ctx.color[1:]
     return icon

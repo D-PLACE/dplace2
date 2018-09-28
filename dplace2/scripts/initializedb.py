@@ -7,8 +7,8 @@ from collections import defaultdict, OrderedDict
 import math
 
 import transaction
-from sqlalchemy import func
-from sqlalchemy.orm import joinedload_all
+from sqlalchemy import func, distinct
+from sqlalchemy.orm import joinedload_all, joinedload
 from clldutils.path import Path
 from clldutils.misc import slug
 from clld.scripts.util import initializedb, Data, bibtex2source
@@ -46,7 +46,7 @@ biomes = {
 SHAPES = list('ctfds')
 
 
-def get_batches(codes):
+def get_batches(codes):  # pragma: no cover
     try:
         code_map = {int(code.code): code.code for code in codes}
         codes = list(code_map.keys())
@@ -65,7 +65,7 @@ def valid_id(s):
     return s.replace('.', '_')
 
 
-def main(args):
+def main(args):  # pragma: no cover
     data = Data()
     repos = Repos(DATA_REPOS)
 
@@ -101,95 +101,104 @@ def main(args):
     dss = {}
     altname_count = 0
     for i, ds in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id))):
-        dataset = data.add(
-            models.DplaceDataset,
-            ds.id,
-            id=ds.id,
-            name=ds.name,
-            description=ds.description,
-            reference=ds.reference,
-            color=dscolors[i],
-            type=ds.type)
-        for soc in ds.societies:
-            s = data.add(
-                models.Society,
-                soc.id,
-                id=soc.id,
-                xid=soc.xd_id,
-                name=soc.pref_name_for_society,
-                latitude=soc.Lat,
-                longitude=soc.Long,
-                region=regions.get(soc.id, {}).get('name'),
-                dataset=dataset,
-                hraf_id=soc.HRAF_name_ID.id if soc.HRAF_name_ID else None,
-                hraf_name=soc.HRAF_name_ID.name if soc.HRAF_name_ID else None,
-                glottocode=soc.glottocode,
-                year=soc.main_focal_year,
-                name_in_source=soc.ORIG_name_and_ID_in_this_dataset,
-                language=glottolog[soc.glottocode].name,
-                language_family=glottolog[soc.glottocode].family_name or None,
-            )
-            for n in soc.alt_names_by_society:
-                altname_count += 1
-                common.LanguageIdentifier(
-                    language=s,
-                    identifier=common.Identifier(name=n, type='Other names', id=str(altname_count)))
+        if ds.societies:
+            societyset = data.add(
+                models.Societyset,
+                ds.id,
+                id=ds.id,
+                name=ds.name,
+                description=ds.description,
+                reference=ds.reference,
+                color=dscolors[i])
+            for soc in ds.societies:
+                s = data.add(
+                    models.Society,
+                    soc.id,
+                    id=soc.id,
+                    xid=soc.xd_id,
+                    name=soc.pref_name_for_society,
+                    latitude=soc.Lat,
+                    longitude=soc.Long,
+                    region=regions.get(soc.id, {}).get('name'),
+                    societyset=societyset,
+                    hraf_id=soc.HRAF_name_ID.id if soc.HRAF_name_ID else None,
+                    hraf_name=soc.HRAF_name_ID.name if soc.HRAF_name_ID else None,
+                    glottocode=soc.glottocode,
+                    year=soc.main_focal_year,
+                    name_in_source=soc.ORIG_name_and_ID_in_this_dataset,
+                    language=glottolog[soc.glottocode].name,
+                    language_family=glottolog[soc.glottocode].family_name or None,
+                )
+                for n in soc.alt_names_by_society:
+                    altname_count += 1
+                    common.LanguageIdentifier(
+                        language=s,
+                        identifier=common.Identifier(
+                            name=n, type='Other names', id=str(altname_count)))
 
-        for row in ds.variables:
-            v = data.add(
-                models.Variable,
-                row.id,
-                id=valid_id(row.id),
-                name='{0} [{1}]'.format(row.title, row.id),
-                description=row.definition,
-                type=row.type,
-                dataset=dataset,
-            )
-            for cat in set(row.category):
-                obj = data['Category'].get(slug(cat))
-                if not obj:
-                    obj = data.add(models.Category, slug(cat), id=slug(cat), name=cat)
-                DBSession.add(models.VariableCategory(variable=v, category=obj))
+        if ds.variables:
+            dataset = data.add(
+                models.DplaceDataset,
+                ds.id,
+                id=ds.id,
+                name=ds.name,
+                description=ds.description,
+                reference=ds.reference,
+                type=ds.type)
+            for row in ds.variables:
+                v = data.add(
+                    models.Variable,
+                    row.id,
+                    id=valid_id(row.id),
+                    name='{0} [{1}]'.format(row.title, row.id),
+                    description=row.definition,
+                    type=row.type,
+                    dataset=dataset,
+                )
+                for cat in set(row.category):
+                    obj = data['Category'].get(slug(cat))
+                    if not obj:
+                        obj = data.add(models.Category, slug(cat), id=slug(cat), name=cat)
+                    DBSession.add(models.VariableCategory(variable=v, category=obj))
 
-            codes = [code for code in row.codes if code.code != 'NA']
-            batches = get_batches(codes)
-            ncolors = len(batches) if batches else len(codes)
-            colors = qualitative_colors(ncolors)
-            if v.type == 'Ordinal' and 3 <= ncolors <= 9:
-                colors = sequential_colors(ncolors)
-            if batches:
-                icons = {}
-                for batch, color in zip(batches, colors):
-                    for c, shape in batch:
-                        icons[c] = shape + color[1:]
-                print(icons)
-            else:
-                icons = dict(zip([c.code for c in codes], ['c' + c.replace('#', '') for c in colors]))
-            for code in codes:
-                icon = icons[code.code]
-                if v.id == 'EcoRegion':
-                    icon = 'c' + biomes[code.code[1:3]][1:]
-                elif v.id == 'Biome':
-                    icon = 'c' + biomes['{0:02}'.format(int(code.code))][1:]
+                codes = [code for code in row.codes if code.code != 'NA']
+                batches = get_batches(codes)
+                ncolors = len(batches) if batches else len(codes)
+                colors = qualitative_colors(ncolors)
+                if v.type == 'Ordinal' and 3 <= ncolors <= 9:
+                    colors = sequential_colors(ncolors)
+                if batches:
+                    icons = {}
+                    for batch, color in zip(batches, colors):
+                        for c, shape in batch:
+                            icons[c] = shape + color[1:]
+                    print(icons)
+                else:
+                    icons = dict(zip([c.code for c in codes], ['c' + c.replace('#', '') for c in colors]))
+                for code in codes:
+                    icon = icons[code.code]
+                    if v.id == 'EcoRegion':
+                        icon = 'c' + biomes[code.code[1:3]][1:]
+                    elif v.id == 'Biome':
+                        icon = 'c' + biomes['{0:02}'.format(int(code.code))][1:]
 
-                try:
-                    number = int(code.code)
-                except ValueError:
-                    number = None
+                    try:
+                        number = int(code.code)
+                    except ValueError:
+                        number = None
 
-                data.add(
-                    models.Code,
-                    (v.id, code.code),
-                    id=valid_id('{0}-{1}'.format(code.var_id, code.code)),
-                    number=number,
-                    abbr=code.code,
-                    name=code.name,
-                    description=code.description,
+                    data.add(
+                        models.Code,
+                        (v.id, code.code),
+                        id=valid_id('{0}-{1}'.format(code.var_id, code.code)),
+                        number=number,
+                        abbr=code.code,
+                        name=code.name,
+                        description=code.description,
                     icon=icon,
                     parameter=v,
                 )
-
-        dss[dataset.id] = ds
+        dss[ds.id] = ds
 
     DBSession.flush()
 
@@ -328,7 +337,7 @@ def main(args):
         transaction.commit()
 
 
-def color(minval, maxval, val):
+def color(minval, maxval, val):  # pragma: no cover
     """ Convert val in range minval..maxval to the range 0..120 degrees which
         correspond to the colors Red and Green in the HSV colorspace.
     """
@@ -339,11 +348,11 @@ def color(minval, maxval, val):
     return '#' + ''.join("{0:02x}".format(int(255*n)) for n in hsv_to_rgb(h/360, 1., 1.))
 
 
-def mlog(n):
+def mlog(n):  # pragma: no cover
     return math.log(max([n, 0.0001]))
 
 
-def prime_cache(args):
+def prime_cache(args):  # pragma: no cover
     """If data needs to be denormalized for lookup, do that here.
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
@@ -395,14 +404,19 @@ def prime_cache(args):
             for v in vs.values:
                 v.jsondata = {'color': color(cminimum, cmaximum, mlog(v.value_float) if log else float(v.value_float))}
 
-    for attr, t in [
-        ('count_societies', models.Society),
-        ('count_variables', models.Variable)
-    ]:
-        counts = DBSession.query(
-            t.dataset_pk, func.count(t.pk)).group_by(t.dataset_pk).all()
-        for pk, count in counts:
-            setattr(models.DplaceDataset.get(pk), attr, count)
+    soc_counts = DBSession.query(
+            common.ValueSet.contribution_pk, func.count(distinct(common.ValueSet.language_pk))
+    ).group_by(common.ValueSet.contribution_pk).all()
+    for pk, count in soc_counts:
+        models.DplaceDataset.get(pk).count_societies = count
+
+    counts = DBSession.query(
+        models.Variable.dataset_pk, func.count(models.Variable.pk)).group_by(models.Variable.dataset_pk).all()
+    for pk, count in counts:
+        models.DplaceDataset.get(pk).count_variables = count
+
+    for ss in DBSession.query(models.Societyset).options(joinedload(models.Societyset.societies)):
+        ss.count_societies = len(ss.societies)
 
     srs = {
         k: v for k, v in DBSession.execute("""\

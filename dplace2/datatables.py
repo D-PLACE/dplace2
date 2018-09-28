@@ -16,7 +16,7 @@ from clld_phylogeny_plugin.datatables import Phylogenies
 
 from dplace2.models import (
     DplaceDataset, Society, Variable, Category, VariableCategory, Datapoint,
-    DatapointReference, DplacePhylogeny,
+    DatapointReference, DplacePhylogeny, Societyset,
 )
 
 
@@ -82,12 +82,12 @@ class Datasets(Contributions):
 
 
 class Societies(Languages):
-    __constraints__ = {common.Contribution}
+    __constraints__ = {Societyset}
 
     def base_query(self, query):
-        query = query.join(DplaceDataset).options(joinedload(Society.dataset))
-        if self.contribution:
-            query = query.filter(Society.dataset_pk == self.contribution.pk)
+        query = query.join(Societyset).options(joinedload(Society.societyset))
+        if self.societyset:
+            query = query.filter(Society.societyset_pk == self.societyset.pk)
         return query
 
     def col_defs(self):
@@ -107,14 +107,15 @@ class Societies(Languages):
                 'longitude',
                 sDescription='<small>The geographic longitude</small>'),
             Col(self, 'region', model_col=Society.region),
+            LinkToMapCol(self, '#'),
         ]
-        if not self.contribution:
+        if not self.societyset:
             res.append(LinkCol(
                 self,
-                'dataset',
-                choices=sorted((c for c, in DBSession.query(DplaceDataset.name).join(Society).distinct())),
-                model_col=DplaceDataset.name,
-                get_object=lambda i: i.dataset))
+                'societyset',
+                choices=sorted((c for c, in DBSession.query(Societyset.name).join(Society).distinct())),
+                model_col=Societyset.name,
+                get_object=lambda i: i.societyset))
             res.append(LinkToMapCol(self, 'm'))
         return res
 
@@ -208,9 +209,19 @@ class DplacePhylogenies(Phylogenies):
         return opts
 
 
+class Societysets(DataTable):
+    def col_defs(self):
+        return [
+            LinkCol(self, 'name'),
+            Col(self, 'societies', sTitle='#', model_col=Societyset.count_societies),
+            Col(self, 'reference', model_col=Societyset.reference),
+        ]
+
+
 def includeme(config):
     config.register_datatable('languages', Societies)
     config.register_datatable('contributions', Datasets)
+    config.register_datatable('societysets', Societysets)
     config.register_datatable('parameters', Variables)
     config.register_datatable('values', Datapoints)
     config.register_datatable('phylogenys', DplacePhylogenies)

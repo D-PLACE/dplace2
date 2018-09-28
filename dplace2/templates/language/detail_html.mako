@@ -10,7 +10,7 @@
     <table class="table table-nonfluid table-condensed">
         <tbody>
         <tr>
-            <td>Name in ${h.link(req, ctx.dataset)}:</td>
+            <td>Name in ${h.link(req, ctx.societyset)}:</td>
             <td>${ctx.name_in_source}</td>
         </tr>
         <tr>
@@ -43,7 +43,7 @@
                     <td>
                         <ul class="unstyled">
                             % for soc in ctx.related:
-                                <li>${h.link(request, soc)} (${h.link(request, soc.dataset)})</li>
+                                <li>${h.link(request, soc)} (${h.link(request, soc.societyset)})</li>
                             % endfor
                         </ul>
                     </td>

@@ -13,6 +13,7 @@ from dplace2 import models
 from dplace2 import interfaces
 from dplace2 import adapters
 from dplace2 import datatables
+from dplace2.interfaces import ISocietyset
 
 _ = lambda s: s
 _('Language')
@@ -33,7 +34,7 @@ class DplaceMapMarker(MapMarker):
     def __call__(self, ctx, req):
         icon = models.get_icon(ctx)
         if not icon:
-            return MapMarker.__call__(self, ctx, req)
+            return MapMarker.__call__(self, ctx, req)  # pragma: no cover
 
         return svg.data_url(svg.icon(icon))
 
@@ -42,6 +43,8 @@ class DplaceCtxFactoryQuery(CtxFactoryQuery):
     def refined_query(self, query, model, req):
         if model == common.Contribution:
             return query.options(joinedload(models.DplaceDataset.variables))
+        if model == models.Societyset:
+            return query.options(joinedload(models.Societyset.societies))
         return query
 
 
@@ -54,6 +57,8 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.include('clldmpg')
     config.include('clld_phylogeny_plugin')
+    #config.register_datatable('societyset', Phylogenies, overwrite=False)
+    config.register_resource('societyset', models.Societyset, ISocietyset, with_index=True)
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
     config.add_route('variable_on_tree', '/variable_on_tree')

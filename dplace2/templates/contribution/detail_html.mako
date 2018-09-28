@@ -62,27 +62,6 @@
     <p>${ctx.description}</p>
 % endif
 
-<div class="tabbable">
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#variables" data-toggle="tab">Variables</a></li>
-        <li><a href="#societies" data-toggle="tab">Societies</a></li>
-    </ul>
-    <div class="tab-content">
-        <div id="variables" class="tab-pane active">
-            ${request.get_datatable('parameters', h.models.Parameter, contribution=ctx).render()}
-        </div>
-        <div id="societies" class="tab-pane">
-            ${request.get_datatable('languages', h.models.Language, contribution=ctx).render()}
-        </div>
-    </div>
-    <script>
-$(document).ready(function() {
-    if (location.hash !== '') {
-        $('a[href="#' + location.hash.substr(2) + '"]').tab('show');
-    }
-    return $('a[data-toggle="tab"]').on('shown', function(e) {
-        return location.hash = 't' + $(e.target).attr('href').substr(1);
-    });
-});
-    </script>
-</div>
+<h4>Variables</h4>
+
+${request.get_datatable('parameters', h.models.Parameter, contribution=ctx).render()}

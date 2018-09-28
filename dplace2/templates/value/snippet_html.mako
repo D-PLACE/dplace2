@@ -13,4 +13,3 @@
         ${h.linked_references(request, ctx)}
     </p>
 % endif
-
