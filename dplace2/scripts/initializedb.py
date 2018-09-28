@@ -107,7 +107,7 @@ def main(args):
             id=ds.id,
             name=ds.name,
             description=ds.description,
-            reference=ds.reference,  # FIXME: we should have a real description!
+            reference=ds.reference,
             color=dscolors[i],
             type=ds.type)
         for soc in ds.societies:
