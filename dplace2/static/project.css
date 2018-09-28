@@ -20,6 +20,9 @@
 }
 
 .vtable {
+    /*font-weight: bolder;
+    font-style: italic;*/
+    color: black;
     margin-top: 20px;
     margin-bottom: 20px;
     background-repeat: repeat;
@@ -29,6 +32,8 @@
      -moz-border-radius: 3px;
           border-radius: 3px;
 }
+
+.vtable dl dt {font-weight: bolder;}
 
 .linguistic {
     background-image: url(/static/Language_Pattern_transparent.png);

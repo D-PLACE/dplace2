@@ -61,7 +61,7 @@ def get_batches(codes):  # pragma: no cover
             return [list(zip(v, SHAPES)) for k, v in sorted(res.items())]
 
 
-def valid_id(s):
+def valid_id(s):  # pragma: no cover
     return s.replace('.', '_')
 
 

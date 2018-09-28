@@ -11,7 +11,8 @@ from clld.web.datatables.value import Values, ValueNameCol
 from clld.db.meta import DBSession
 from clld.db.util import get_distinct_values, icontains
 from clld.db.models import common
-from clld.web.util.htmllib import HTML
+from clld.web.util.htmllib import HTML, literal
+from clld.web.util.helpers import map_marker_img
 from clld_phylogeny_plugin.datatables import Phylogenies
 
 from dplace2.models import (
@@ -122,7 +123,8 @@ class Societies(Languages):
 
 class FloatCol(Col):
     def format(self, item):
-        return '{0:,}'.format(item.value_float)
+        return HTML.span(
+            '{0:,}'.format(item.value_float), literal('&nbsp;'), map_marker_img(self.dt.req, item))
 
 
 class Datapoints(Values):
@@ -159,9 +161,10 @@ class Datapoints(Values):
 
         if self.parameter:
             if self.parameter.type == 'Continuous':
-                res = [FloatCol(self, 'value', model_col=Datapoint.value_float)]
+                res = [
+                    DetailsRowLinkCol(self, 'comment'),
+                    FloatCol(self, 'value', model_col=Datapoint.value_float)]
             res += [
-                # FIXME: use value_float col!
                 LinkCol(self,
                         'language',
                         model_col=common.Language.name,
@@ -172,7 +175,6 @@ class Datapoints(Values):
                     sTitle='Language family',
                     model_col=Society.language_family,
                     get_object=lambda i: i.valueset.language),
-                RefsCol(self, 'source'),
                 LinkToMapCol(self, 'm', get_object=lambda i: i.valueset.language),
             ]
 
@@ -183,7 +185,6 @@ class Datapoints(Values):
                         sTitle=self.req.translate('Parameter'),
                         model_col=common.Parameter.name,
                         get_object=lambda i: i.valueset.parameter),
-                #RefsCol(self, 'source'),
             ]
 
         return res + [

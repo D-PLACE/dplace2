@@ -9,7 +9,7 @@ from itertools import chain
 import re
 from collections import Counter
 
-from sqlalchemy import func, desc
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from clld.db.meta import DBSession
 from clld.db.models import common
@@ -28,12 +28,10 @@ def phylogeny_detail_html(request=None, context=None, **kw):
 def link_sources(req, value, s=None):
     s = s if s is not None else (value.comment or '')
     sources = {ref.source.id: ref.source for ref in value.references if ref.source.id}
-    if sources:
-        return re.sub(
-            '(?P<id>%s)' % '|'.join(re.escape(k) for k in sources),
-            lambda m: link(req, sources[m.group('id')]),
-            s)
-    return s
+    return re.sub(
+        '(?P<id>%s)' % '|'.join(re.escape(k) for k in sources),
+        lambda m: link(req, sources[m.group('id')]),
+        s) if sources else s
 
 
 def ext_link(url):

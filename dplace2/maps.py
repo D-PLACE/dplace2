@@ -1,4 +1,4 @@
-from clld.web.maps import Map, Layer
+from clld.web.maps import Map, Layer, ParameterMap
 from clld.db.meta import DBSession
 from clld.web.util.helpers import map_marker_img
 
@@ -28,5 +28,11 @@ class LanguagesMap(Map):
         return {'hash': True, 'icon_size': 15, 'base_layer': "Esri.WorldPhysical"}
 
 
+class VariableMap(ParameterMap):
+    def get_default_options(self):
+        return {'hash': True, 'icon_size': 15, 'base_layer': "Esri.WorldPhysical"}
+
+
 def includeme(config):
+    config.register_map('parameter', VariableMap)
     config.register_map('languages', LanguagesMap)

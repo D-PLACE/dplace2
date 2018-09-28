@@ -43,11 +43,6 @@ class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
     pk = Column(Integer, ForeignKey('phylogeny.pk'), primary_key=True)
     glottolog = Column(Boolean)
 
-    @property
-    def citation(self):
-        from clld.web.util.htmllib import HTML
-        return HTML.blockquote(self.reference)
-
 
 @implementer(interfaces.IContribution)
 class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
@@ -143,13 +138,13 @@ def get_icon(ctx):
         value = ctx.values[0]
         if value.domainelement:
             icon = value.domainelement.icon
-        elif 'color' in value.jsondata or {}:
-            icon = 'c' + value.jsondata['color'][1:]
+        elif 'color' in value.jsondatadict:
+            icon = 's' + value.jsondata['color'][1:]
     elif isinstance(ctx, Value):
         if ctx.domainelement:
             icon = ctx.domainelement.icon
-        elif 'color' in ctx.jsondata or {}:
-            icon = 'c' + ctx.jsondata['color'][1:]
+        elif 'color' in ctx.jsondatadict:
+            icon = 's' + ctx.jsondata['color'][1:]
     elif isinstance(ctx, DomainElement):
         icon = ctx.icon
     elif isinstance(ctx, Language):

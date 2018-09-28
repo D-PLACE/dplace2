@@ -62,6 +62,10 @@ def main(global_config, **settings):
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
     config.add_route('variable_on_tree', '/variable_on_tree')
+    #/howto
+    #/technology
+
+    config.add_301('/home', lambda req: req.route_url('dataset'))
     config.add_301('/team', lambda req: req.route_url('about', _anchor='team'))
     config.add_301('/publication', lambda req: req.route_url('about', _anchor='publications'))
     config.add_301('/howtocite', lambda req: req.route_url('about', _anchor='howtocite'))

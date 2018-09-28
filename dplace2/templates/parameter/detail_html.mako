@@ -5,7 +5,7 @@
 <%! import json %>
 
 <div class="row-fluid">
-    <div class="span8">
+    <div class="span7">
         <h2>${ctx.name}</h2>
         <ul class="nav nav-pills">
             <li class="">
@@ -30,12 +30,6 @@
                 </a>
             </li>
         </ul>
-        % if ctx.description:
-            <div class="alert alert-success">
-                <h4>Definition in ${h.link(request, ctx.dataset)}:</h4>
-                ${ctx.description}
-            </div>
-        % endif
         <div id="tree-container" class="well well-small">
             <p>
                 You may display the datapoints for this variable on a given
@@ -55,35 +49,44 @@
             </form>
         </div>
     </div>
-    <div class="span4">
+    <div class="span5">
         <div class="vtable ${ctx.dataset.type}">
-            <h5>Values</h5>
-            % if ctx.domain:
-                <table class="table table-condensed">
-                    % for de in ctx.domain:
-                        <tr>
-                            <td>${h.map_marker_img(req, de, width=25, height=25)}</td>
-                            <td>${de.number}</td>
-                            <td>${de}</td>
-                            <td class="right">${len(de.values)}</td>
-                        </tr>
-                    % endfor
-                </table>
-            % elif 'range' in ctx.jsondata or {}:
-                <table>
-                    % for number, color in ctx.jsondata['range']:
-                        <tr>
-                            <td>
-                                % if loop.first or loop.last:
-                                    ${'{0:,}'.format(number)}
-                                % endif
-                                &nbsp;
-                            </td>
-                            <td style="background-color: ${color}">&nbsp;&nbsp;&nbsp;</td>
-                        </tr>
-                    % endfor
-                </table>
-            % endif
+            <dl>
+                <dt>Dataset:</dt>
+                <dd>${h.link(request, ctx.dataset)}</dd>
+                % if ctx.description:
+                    <dt>Description:</dt>
+                    <dd>${ctx.description}</dd>
+                % endif
+                <dt>Values:</dt>
+                <dd>
+                    % if ctx.domain:
+                        <table class="table table-condensed">
+                            % for de in ctx.domain:
+                                <tr>
+                                    <td>${h.map_marker_img(req, de, width=25, height=25)}</td>
+                                    <td>${de.number}</td>
+                                    <td>${de}</td>
+                                    <td class="right">${len(de.values)}</td>
+                                </tr>
+                            % endfor
+                        </table>
+                    % elif 'range' in ctx.jsondata or {}:
+                        <table>
+                            % for number, color in ctx.jsondata['range']:
+                                <tr>
+                                    <td style="background-color: ${color}; padding-right: 10px;">&nbsp;&nbsp;&nbsp;</td>
+                                    <td style="padding-left: 10px;">
+                                        % if loop.first or loop.last:
+                                            ${'{0:,}'.format(number)}
+                                        % endif
+                                    </td>
+                                </tr>
+                            % endfor
+                        </table>
+                    % endif
+                </dd>
+            </dl>
 
         </div>
     </div>
