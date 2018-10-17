@@ -410,6 +410,10 @@ def prime_cache(args):  # pragma: no cover
     for pk, count in soc_counts:
         models.DplaceDataset.get(pk).count_societies = count
 
+    for ds in DBSession.query(models.DplaceDataset):
+        for sspk in DBSession.query(models.Society.societyset_pk).join(common.ValueSet).filter(common.ValueSet.contribution_pk == ds.pk).distinct():
+            DBSession.add(models.DatasetSocietyset(dataset_pk=ds.pk, societyset_pk=sspk))
+
     counts = DBSession.query(
         models.Variable.dataset_pk, func.count(models.Variable.pk)).group_by(models.Variable.dataset_pk).all()
     for pk, count in counts:

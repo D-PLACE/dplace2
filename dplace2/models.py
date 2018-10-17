@@ -44,6 +44,12 @@ class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
     glottolog = Column(Boolean)
 
 
+class DatasetSocietyset(Base):
+    __table_args__ = ()
+    dataset_pk = Column(Integer, ForeignKey('dplacedataset.pk'))
+    societyset_pk = Column(Integer, ForeignKey('societyset.pk'))
+
+
 @implementer(interfaces.IContribution)
 class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     pk = Column(Integer, ForeignKey('contribution.pk'), primary_key=True)
@@ -51,6 +57,7 @@ class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     type = Column(Unicode)
     count_societies = Column(Integer)
     count_variables = Column(Integer)
+    societysets = relationship(Societyset, secondary=DatasetSocietyset.__table__)
 
 
 class SocietyRelation(Base):

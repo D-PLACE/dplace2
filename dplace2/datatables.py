@@ -12,7 +12,7 @@ from clld.db.meta import DBSession
 from clld.db.util import get_distinct_values, icontains
 from clld.db.models import common
 from clld.web.util.htmllib import HTML, literal
-from clld.web.util.helpers import map_marker_img
+from clld.web.util.helpers import map_marker_img, link
 from clld_phylogeny_plugin.datatables import Phylogenies
 
 from dplace2.models import (
@@ -57,7 +57,7 @@ class Variables(Parameters):
         res = [
             LinkCol(self, 'name'),
             Col(self, 'type', choices=get_distinct_values(Variable.type), model_col=Variable.type),
-            CategoryCol(self, 'category'),
+            CategoryCol(self, 'category', sTitle='Theme'),
         ]
         if not self.contribution:
             res.append(
@@ -70,14 +70,34 @@ class Variables(Parameters):
         return res
 
 
+class SocietysetsCol(Col):
+    __kw__ = dict(bSearchable=False, bSortable=False)
+
+    def format(self, item):
+        return HTML.ul(*[HTML.li(link(self.dt.req, ss)) for ss in item.societysets])
+
+
 class Datasets(Contributions):
     def col_defs(self):
         return [
-            DetailsRowLinkCol(self, 'more'),
             LinkCol(self, 'name'),
-            Col(self, 'type', model_col=DplaceDataset.type),
-            Col(self, 'cvars', sTitle='# variables', model_col=DplaceDataset.count_variables),
-            Col(self, 'csoc', sTitle='# societies', model_col=DplaceDataset.count_societies),
+            Col(self,
+                'type',
+                input_size='mini',
+                model_col=DplaceDataset.type,
+                choices=get_distinct_values(DplaceDataset.type)),
+            DetailsRowLinkCol(self, 'more', button_text='themes'),
+            Col(self,
+                'cvars',
+                input_size='mini',
+                sTitle='# variables',
+                model_col=DplaceDataset.count_variables),
+            Col(self,
+                'csoc',
+                input_size='mini',
+                sTitle='# societies',
+                model_col=DplaceDataset.count_societies),
+            SocietysetsCol(self, 'societysets', sTitle='Society sets'),
             CitationCol(self, 'cite'),
         ]
 
