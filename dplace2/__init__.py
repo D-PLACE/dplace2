@@ -28,6 +28,8 @@ _('DomainElement')
 _('DomainElements')
 _('Value')
 _('Values')
+_('Societyset')
+_('Societysets')
 
 
 class DplaceMapMarker(MapMarker):
@@ -57,11 +59,16 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.include('clldmpg')
     config.include('clld_phylogeny_plugin')
+
+    menuitems = config.registry.settings['clld.menuitems_list']
+    config.register_menu(('about', dict(label='About')), *menuitems)
+
     #config.register_datatable('societyset', Phylogenies, overwrite=False)
     config.register_resource('societyset', models.Societyset, ISocietyset, with_index=True)
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
     config.add_route('variable_on_tree', '/variable_on_tree')
+    config.add_route('datasources', '/source')
     #/howto
     #/technology
 
@@ -69,5 +76,4 @@ def main(global_config, **settings):
     config.add_301('/team', lambda req: req.route_url('about', _anchor='team'))
     config.add_301('/publication', lambda req: req.route_url('about', _anchor='publications'))
     config.add_301('/howtocite', lambda req: req.route_url('about', _anchor='howtocite'))
-    config.add_301('/source', lambda req: req.route_url('contributions'))
     return config.make_wsgi_app()

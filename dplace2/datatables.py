@@ -95,7 +95,7 @@ class Societies(Languages):
         res = [
             IdCol(self, 'id'),
             LinkCol(self, 'name'),
-            Col(self, 'glottocode', model_col=Society.glottocode),
+            Col(self, 'glottocode', model_col=Society.glottocode, input_size='mini'),
             Col(self, 'language', model_col=Society.language, sTitle='Language'),
             Col(self,
                 'language_family',
@@ -103,9 +103,11 @@ class Societies(Languages):
                 choices=get_distinct_values(Society.language_family)),
             Col(self,
                 'latitude',
+                input_size='mini',
                 sDescription='<small>The geographic latitude</small>'),
             Col(self,
                 'longitude',
+                input_size='mini',
                 sDescription='<small>The geographic longitude</small>'),
             Col(self, 'region', model_col=Society.region),
             LinkToMapCol(self, '#'),
@@ -117,7 +119,6 @@ class Societies(Languages):
                 choices=sorted((c for c, in DBSession.query(Societyset.name).join(Society).distinct())),
                 model_col=Societyset.name,
                 get_object=lambda i: i.societyset))
-            res.append(LinkToMapCol(self, 'm'))
         return res
 
 

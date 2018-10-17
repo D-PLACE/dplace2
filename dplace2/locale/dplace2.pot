@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dplace2 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-14 15:33+0200\n"
+"POT-Creation-Date: 2018-10-17 11:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,5 +63,13 @@ msgstr ""
 
 #: dplace2/__init__.py:30
 msgid "Values"
+msgstr ""
+
+#: dplace2/__init__.py:31
+msgid "Societyset"
+msgstr ""
+
+#: dplace2/__init__.py:32
+msgid "Societysets"
 msgstr ""
 
