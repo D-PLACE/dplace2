@@ -8,8 +8,9 @@
 <p>
     Select a phylogeny or classification from the list below. You will then have the option to map cultural or
     environmental variables onto the phylogeny.
-    ## FIXME: implement or link to repository?
-    ##You will also have the option of downloading the phylogeny as a nexus file.
+    Note that if a variable has not been coded for any societies on this phylogeny, it will not be available.
+    If you would like to download the phylogeny and work with the data on your own system, please visit our
+    ${h.external_link('https://github.com/D-PLACE/dplace-data/tree/master/phylogenies', label='repository of trees')}.
 </p>
 <div>
     ${ctx.render()}

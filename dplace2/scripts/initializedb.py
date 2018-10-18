@@ -20,7 +20,7 @@ from pydplace.api import Repos
 
 import dplace2
 from dplace2 import models
-from clld_phylogeny_plugin.models import TreeLabel, LanguageTreeLabel
+from clld_phylogeny_plugin.models import TreeLabel, LanguageTreeLabel, Phylogeny
 
 DATA_REPOS = Path(dplace2.__file__).parent / '..' / '..' / 'dplace-data'
 biomes = {
@@ -172,7 +172,6 @@ def main(args):  # pragma: no cover
                     for batch, color in zip(batches, colors):
                         for c, shape in batch:
                             icons[c] = shape + color[1:]
-                    print(icons)
                 else:
                     icons = dict(zip([c.code for c in codes], ['c' + c.replace('#', '') for c in colors]))
                 for code in codes:
@@ -203,6 +202,9 @@ def main(args):  # pragma: no cover
     DBSession.flush()
 
     for ds in dss.values():
+        #
+        # FIXME: do we have to evaluate xd_id as well?
+        #
         for relsocs in ds.society_relations:
             soc = data['Society'][relsocs.id]
             for relsoc in relsocs.related:
@@ -362,9 +364,12 @@ def prime_cache(args):  # pragma: no cover
     ):
         var.categories_str = '|'.join(ca.category.name for ca in var.category_assocs)
 
+    socs_by_var = {}
     for var in DBSession.query(models.Variable)\
-            .options(joinedload_all(models.Variable.valuesets, common.ValueSet.values))\
-            .filter(models.Variable.type == 'Continuous'):
+            .options(joinedload_all(models.Variable.valuesets, common.ValueSet.values)):
+        socs_by_var[var.pk] = set(vs.language_pk for vs in var.valuesets)
+        if var.type != 'Continuous':
+            continue
         values = [v.value_float for v in chain(*[vs.values for vs in var.valuesets])]
         cminimum = minimum = min(values)
         cmaximum = maximum = max(values)
@@ -404,6 +409,11 @@ def prime_cache(args):  # pragma: no cover
             for v in vs.values:
                 v.jsondata = {'color': color(cminimum, cmaximum, mlog(v.value_float) if log else float(v.value_float))}
 
+    for soc1, socset1 in socs_by_var.items():
+        for soc2, socset2 in socs_by_var.items():
+            if soc1 != soc2 and socset1.intersection(socset2):
+                DBSession.add(models.VariableVariable(variable_pk=soc1, comparable_pk=soc2))
+
     soc_counts = DBSession.query(
             common.ValueSet.contribution_pk, func.count(distinct(common.ValueSet.language_pk))
     ).group_by(common.ValueSet.contribution_pk).all()
@@ -431,6 +441,21 @@ group by l.pk""")}
     for lpk, sspks in srs.items():
         for spk in sspks:
             DBSession.add(common.LanguageSource(language_pk=lpk, source_pk=spk))
+
+    for phy in DBSession.query(Phylogeny).options(joinedload_all(Phylogeny.treelabels, TreeLabel.language_assocs)):
+        soc_set = defaultdict(list)
+        for tl in phy.treelabels:
+            for la in tl.language_assocs:
+                soc_set[la.language_pk].append(tl.name)
+
+        for spk, labels in soc_set.items():
+            DBSession.add(models.SocietyPhylogeny(
+                society_pk=spk, phylogeny_pk=phy.pk, label=' / '.join(labels)))
+
+        soc_set = set(soc_set.keys())
+        for vpk, socs in socs_by_var.items():
+            if soc_set.intersection(socs):
+                DBSession.add(models.VariablePhylogeny(variable_pk=vpk, phylogeny_pk=phy.pk))
 
 
 if __name__ == '__main__':  # pragma: no cover

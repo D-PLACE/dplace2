@@ -22,7 +22,11 @@ from dplace2 import models
 
 
 def phylogeny_detail_html(request=None, context=None, **kw):
-    return {'ms': CombinationMultiSelect}
+    class VariableMultiSelect(CombinationMultiSelect):
+        @classmethod
+        def query(cls):
+            return context.variables
+    return {'ms': VariableMultiSelect}
 
 
 def link_sources(req, value, s=None):
@@ -82,24 +86,15 @@ ORDER BY vs DESC
 class VariableMultiSelect(CombinationMultiSelect):
     def get_options(self):
         res = CombinationMultiSelect.get_options(self)
-        res['maximumSelectionSize'] = 3
+        res['maximumSelectionSize'] = 4
         return res
 
 
 def combination_detail_html(request=None, context=None, **kw):
-    p = [(p, {de.pk: de for de in p.domain or []}) for p in context.parameters]
-    vs = [aliased(common.ValueSet) for _ in range(len(p))]
-    v = [aliased(common.Value) for _ in range(len(p))]
-    entities = [common.Language] + list(chain(*zip(v, vs)))
-    q = DBSession.query(*entities).order_by(common.Language.name)
-    for i in range(len(p)):
-        q = q.filter(v[i].valueset_pk == vs[i].pk)
-        q = q.filter(vs[i].language_pk == common.Language.pk)
-        q = q.filter(vs[i].parameter_pk == p[i][0].pk)
+    from dplace2.models import grouped_values
     return {
-        'params': p,
-        'res': q.all(),
         'ms': VariableMultiSelect,
+        'res': list(grouped_values(context)),
         'trees': DBSession.query(models.DplacePhylogeny)
         .order_by(models.DplacePhylogeny.glottolog, models.Phylogeny.name).all()
     }
@@ -107,8 +102,8 @@ def combination_detail_html(request=None, context=None, **kw):
 
 def parameter_detail_html(context=None, request=None, **kw):
     return dict(
-        trees=DBSession.query(models.DplacePhylogeny)
-        .order_by(models.DplacePhylogeny.glottolog, models.Phylogeny.name).all())
+        variables=context.comparable_variables,
+        trees=sorted(context.phylogenies, key=lambda p: p.name))
 
 
 def variables_by_category(dataset):

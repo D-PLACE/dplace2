@@ -1,3 +1,6 @@
+from itertools import groupby
+from collections import defaultdict
+
 from zope.interface import implementer
 from sqlalchemy import (
     Column,
@@ -15,7 +18,7 @@ from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin, PolymorphicBaseMixin
 from clld.db.models.common import (
     Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin, Value,
-    ValueSet,
+    ValueSet, Combination,
 )
 from clld.db.models.source import HasSourceNotNullMixin
 
@@ -25,6 +28,20 @@ from clld_phylogeny_plugin.models import Phylogeny
 from dplace2.interfaces import ISocietyset
 
 
+def grouped_values(combination):
+    for lpk, values in groupby(
+        sorted(combination.values, key=lambda v: v.valueset.language_pk),
+        lambda v: v.valueset.language_pk
+    ):
+        values_, language = defaultdict(list), None
+        for v in values:
+            if not language:
+                language = v.valueset.language
+            values_[v.valueset.parameter_pk].append(v)
+        assert len(values_) == len(combination.parameters), 'missing value for at least one parameter!'
+        yield language, values_
+
+
 class WithSourceMixin(object):
     year = Column(Integer)
     author = Column(Unicode)
@@ -32,16 +49,16 @@ class WithSourceMixin(object):
     reference = Column(Unicode)
 
 
+class VariablePhylogeny(Base):
+    __table_args__ = (UniqueConstraint('variable_pk', 'phylogeny_pk'),)
+    variable_pk = Column(Integer, ForeignKey('variable.pk'))
+    phylogeny_pk = Column(Integer, ForeignKey('phylogeny.pk'))
+
+
 @implementer(ISocietyset)
 class Societyset(Base, PolymorphicBaseMixin, IdNameDescriptionMixin, WithSourceMixin):
     color = Column(Unicode)
     count_societies = Column(Integer)
-
-
-@implementer(IPhylogeny)
-class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
-    pk = Column(Integer, ForeignKey('phylogeny.pk'), primary_key=True)
-    glottolog = Column(Boolean)
 
 
 class DatasetSocietyset(Base):
@@ -95,8 +112,23 @@ class Society(CustomModelMixin, Language):
                 self.hraf_id)
 
 
+class SocietyPhylogeny(Base):
+    __table_args__ = (UniqueConstraint('society_pk', 'phylogeny_pk'),)
+    label = Column(Unicode)
+    society_pk = Column(Integer, ForeignKey('society.pk'))
+    phylogeny_pk = Column(Integer, ForeignKey('phylogeny.pk'))
+    society = relationship(Society, backref='phylogeny_assocs')
+    phylogeny = relationship(Phylogeny, backref='society_assocs')
+
+
 class Category(Base, IdNameDescriptionMixin):
     pass
+
+
+class VariableVariable(Base):
+    __table_args__ = ()
+    variable_pk = Column(Integer, ForeignKey('variable.pk'))
+    comparable_pk = Column(Integer, ForeignKey('variable.pk'))
 
 
 @implementer(interfaces.IParameter)
@@ -106,6 +138,23 @@ class Variable(CustomModelMixin, Parameter):
     dataset_pk = Column(Integer, ForeignKey('dplacedataset.pk'))
     dataset = relationship(DplaceDataset, backref='variables')
     categories_str = Column(Unicode)
+    phylogenies = relationship(Phylogeny, secondary=VariablePhylogeny.__table__)
+
+    @declared_attr
+    def comparable_variables(cls):
+        return relationship(
+            cls,
+            secondary=VariableVariable.__table__,
+            primaryjoin=cls.pk == VariableVariable.variable_pk,
+            secondaryjoin=cls.pk == VariableVariable.comparable_pk,
+        )
+
+
+@implementer(IPhylogeny)
+class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
+    pk = Column(Integer, ForeignKey('phylogeny.pk'), primary_key=True)
+    glottolog = Column(Boolean)
+    variables = relationship(Variable, secondary=VariablePhylogeny.__table__)
 
 
 class VariableCategory(Base):
@@ -131,6 +180,14 @@ class Datapoint(CustomModelMixin, Value):
     source = Column(Unicode)
     value_float = Column(Float)
 
+    def spec(self):
+        res = ''
+        if self.year:
+            res += ' ({0})'.format(self.year)
+        if self.sub_case:
+            res += ' [{0}]'.format(self.sub_case)
+        return res.strip()
+
 
 class DatapointReference(Base, HasSourceNotNullMixin):
     __table_args__ = (UniqueConstraint('value_pk', 'source_pk', 'description'),)
@@ -152,6 +209,10 @@ def get_icon(ctx):
             icon = ctx.domainelement.icon
         elif 'color' in ctx.jsondatadict:
             icon = 's' + ctx.jsondata['color'][1:]
+        else:
+            print(ctx.valueset.parameter)
+            print(ctx.valueset.language)
+            raise ValueError(ctx)
     elif isinstance(ctx, DomainElement):
         icon = ctx.icon
     elif isinstance(ctx, Language):

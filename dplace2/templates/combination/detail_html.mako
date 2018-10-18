@@ -61,18 +61,29 @@
             </div>
         % endif
 
+        ${req.map.render()}
+
         <%util:table items="${res}" args="item">\
         <%def name="head()">
             <th></th>
-        % for p, domain in params:
+        % for p in ctx.parameters:
             <th>${p.id}</th>
         % endfor
         </%def>
-            <th>${item[0]}</th>
-        % for i in range(len(params)):
+            <th>${h.link(req, item[0])}</th>
+        % for p in ctx.parameters:
             <td>
-                ${h.map_marker_img(req, item[2*i + 1])|n}
-            ${params[i][1][item[2*i + 1].domainelement_pk].name if item[2*i + 1].domainelement_pk in params[i][1] else item[2*i + 1].name}
+                <ul class="unstyled">
+                % for v in item[1][p.pk]:
+                    <li>
+                        ${h.map_marker_img(req, v)|n}
+                        ${v}
+                        <small>
+                            ${v.spec()}
+                        </small>
+                    </li>
+                % endfor
+                </ul>
             </td>
         % endfor
         </%util:table>

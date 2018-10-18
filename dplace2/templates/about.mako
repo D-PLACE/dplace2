@@ -117,7 +117,7 @@
     <p>
         Finally, a number of people provided assistance in preparing data for inclusion in D-PLACE, including
         Christopher Blackford, Kaylin Clements, Anna Kellogg, Hannah Haynie, Patrick Kavanagh, Ameena Khan,
-        Beata Opalinska, Anum Rafiq, Anastasia Stellato, and George Tsourounis.
+        Beata Opalinska, Anum Rafiq, Anastasia Stellato, George Tsourounis, Sreeja Mitra and Xinyu Pei.
     </p>
     <p>
         We are grateful to the Max Planck Institute for its commitment to provide long-term hosting for D-PLACE.

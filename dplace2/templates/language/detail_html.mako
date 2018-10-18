@@ -4,6 +4,50 @@
 <%! active_menu_item = "languages" %>
 <%block name="title">${_('Language')} ${ctx.name}</%block>
 
+<%def name="society_meta()">
+    <div class="accordion" id="sidebar-accordion">
+        % if getattr(request, 'map', False):
+            <%util:accordion_group eid="acc-map" parent="sidebar-accordion" title="Map" open="${True}">
+                ${request.map.render()}
+                ${h.format_coordinates(ctx)}
+            </%util:accordion_group>
+        % endif
+        % if ctx.sources:
+            <%util:accordion_group eid="sources" parent="sidebar-accordion" title="Sources">
+                <ul>
+                    % for source in ctx.sources:
+                        <li>${h.link(request, source, label=source.description)}<br/>
+                            <small>${h.link(request, source)}</small>
+                        </li>
+                    % endfor
+                </ul>
+            </%util:accordion_group>
+        % endif
+        % if ctx.identifiers:
+            <%util:accordion_group eid="acc-names" parent="sidebar-accordion" title="${_('Alternative names')}">
+                <dl>
+                    % for type_, identifiers in h.groupby(sorted(ctx.identifiers, key=lambda i: i.type), lambda j: j.type):
+                        <dt>${type_}:</dt>
+                    % for identifier in identifiers:
+                        <dd>${h.language_identifier(request, identifier)}</dd>
+                    % endfor
+                    % endfor
+                </dl>
+            </%util:accordion_group>
+        % endif
+        % if ctx.phylogeny_assocs:
+            <%util:accordion_group eid="acc-phy" parent="sidebar-accordion" title="${_('Phylogenies')}">
+                <ul>
+                    % for pa in ctx.phylogeny_assocs:
+                        <li><strong>${pa.label}</strong> on ${h.link(req, pa.phylogeny)}</li>
+                    % endfor
+                </ul>
+            </%util:accordion_group>
+        % endif
+    </div>
+</%def>
+
+
 <h2>${_('Language')}: ${ctx.name} (${ctx.id})</h2>
 
 <div class="well well-small">
@@ -31,7 +75,8 @@
                     <td>eHRAF:</td>
                     <td>
                         <a href="${ctx.hraf_url}">
-                            <img width="18" style="margin-top: -2px" src="${request.static_url('dplace2:static/hrafLogoBlue_inverted.png')}">
+                            <img width="18" style="margin-top: -2px"
+                                 src="${request.static_url('dplace2:static/hrafLogoBlue_inverted.png')}">
                             ${'{0} ({1})'.format(ctx.hraf_name, ctx.hraf_id)}
                         </a>
                     </td>
@@ -56,5 +101,5 @@
 ${request.get_datatable('values', h.models.Value, language=ctx).render()}
 
 <%def name="sidebar()">
-    ${util.language_meta()}
+    ${society_meta()}
 </%def>

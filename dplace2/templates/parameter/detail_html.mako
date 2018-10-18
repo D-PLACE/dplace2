@@ -48,6 +48,24 @@
                 <button class="btn" type="submit">Submit</button>
             </form>
         </div>
+        <div class="well well-small">
+            <p>
+                You may combine this variable with a different variable by selecting on in the list below
+                and clicking "Submit".
+            </p>
+            <form action="${request.route_url('select_combination')}"
+                  method="get"
+                  class="form-inline">
+                <input type="hidden" name="parameters" value="${ctx.id}"/>
+                <select id="pa" name="parameters">
+                    <label for="pa">Variable</label>
+                    % for param in variables:
+                        <option value="${param.id}">${param.name}</option>
+                    % endfor
+                </select>
+                <button class="btn" type="submit">Submit</button>
+            </form>
+        </div>
     </div>
     <div class="span5">
         <div class="vtable ${ctx.dataset.type}">
