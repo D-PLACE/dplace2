@@ -25,9 +25,11 @@
 
 <div class="alert alert-success">
     <button type="button" class="close" data-dismiss="alert" style="float: right;">&times;</button>
+
+
     Use the icons on the right to switch between a searchable map vs. searchable table of societies. A “society” in
-    D-PLACE can be understood as a group of people whose cultural practices were documented at particular time and
-    place, and who generally speak a dialect or language different from that of their neighbours (more details
+    D-PLACE is a group of people whose cultural practices were documented at particular time and place, and who
+    generally share a dialect or language, which is often different from that of neighbouring groups (more details
     <a href="${req.route_url('glossary', _anchor='q4')}">here</a>).
     Selecting a particular society (point)
     <a href="#map-container">on the map</a>

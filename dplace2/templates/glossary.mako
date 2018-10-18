@@ -18,6 +18,10 @@
             <li><a href="#q10">10. I identify as a member of a D-PLACE “society” and/or have concerns or questions about
                 data in D-PLACE. How can I share my concerns?</a></li>
             <li><a href="#q11">11. I would like to contribute data to D-PLACE. Where do I start?</a></li>
+            <li><a href="#q12">12. Why the emphasis on language and linguistic phylogenies?</a></li>
+            <li><a href="#q13">13. Why should I use the D-PLACE version of a dataset I already have in digital form?</a>
+            </li>
+            <li><a href="#q14">14. Can I download the entire database, and work with it on a platform I prefer?</a></li>
         </ul>
     </div>
 </%def>
@@ -39,9 +43,10 @@
 
 <%util:section title="2. How should I cite D-PLACE?" level="4" id="q2">
     <p>
-        More information on: citing D-PLACE.is available
+        More information on citing D-PLACE is available
         <a href="${req.route_url('about', _anchor='howtocite')}">here</a>.
-        Please be sure to cite the version of D-PLACE you used,
+        Please be sure to cite the
+        ${h.external_link('https://github.com/D-PLACE/dplace-data/releases', label='version of D-PLACE you used')},
         as we are constantly correcting the data.
     </p>
 </%util:section>
@@ -206,5 +211,51 @@
         can also add suggestions for cross-cultural datasets that should be included in D-PLACE on
         ${h.external_link('https://github.com/D-PLACE/dplace-data/issues', label='GitHub')} –
         just open a new “Issue”, and tag that issue with the “Dataset” label.
+    </p>
+</%util:section>
+
+
+
+<%util:section title="12. Why the emphasis on language and linguistic phylogenies?" level="4" id="q12">
+    <p>
+        The language spoken by a society is an important indicator of historical relatedness, cultural identity and
+        contact. D-PLACE specifies the broad language family affiliation for all societies using the classification
+        systems of ${h.external_link('https://glottolog.org', label='Glottolog')}. Users can treat language family
+        as a variable of interest itself, or can use it as a coarse-level control for relatedness among societies.
+    </p>
+</%util:section>
+
+<%util:section title="13. Why should I use the D-PLACE version of a dataset I already have in digital form?" level="4" id="q13">
+    <p>
+        D-PLACE is carefully documenting data corrections, of which we have had to make many. In compiling some of the
+        ‘core’ D-PLACE datasets, we decided to “undo” decisions by early dataset digitizers to aggregate or ignore some
+        codes, and to simplify variable and code definitions. (These early digitizers were often working with punch
+        cards, so we understand the desire to simplify!) In the case of the Ethnographic Atlas, we re-digitized the
+        original data tables from Murdock’s 20+ installments, each published as an article in the journal Ethnology.
+        Many users have written to us to provide corrected geographic coordinates for particular societies (and we
+        continue to work on improving the accuracy of lat/long coordinates for some datasets). We also have a number of
+        linguists on our team, and have worked carefully to verify that society-language matches are correct. For more
+        on the approach we have taken to digitization/dataset correction, please see the supplementary information of
+        Kirby et al. 2016. More recent changes are being documented on our GitHub site, and therefore are publicly
+        traceable. Finally, D-PLACE is being
+        ${h.external_link('https://github.com/D-PLACE/dplace-data/releases', label='versioned')}
+        and releases archived and accessible through
+        ${h.external_link('https://doi.org/10.5281/zenodo.596376', label='ZENODO')},
+        so any analyses that rely on D-PLACE can cite the particular version of the data that were used, enhancing
+        replicability.
+    </p>
+</%util:section>
+
+<%util:section title="14. Can I download the entire database, and work with it on a platform I prefer?" level="4" id="q14">
+    <p>
+        The folders in our
+        ${h.external_link('https://github.com/D-PLACE/dplace-data/', label='data repository on GitHub')}
+        include raw CSV files that can be downloaded and manipulated outside of D-PLACE.
+        Please note the version of D-PLACE you download, as we are constantly correcting the datasets.
+    </p>
+    <p>
+        If you work with the Python programming language, you may also use the Python package
+        ${h.external_link('https://github.com/D-PLACE/pydplace', label='pydplace')} for programmatic
+        access to D-PLACE data.
     </p>
 </%util:section>

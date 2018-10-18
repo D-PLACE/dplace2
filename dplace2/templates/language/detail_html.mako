@@ -54,7 +54,7 @@
     <table class="table table-nonfluid table-condensed">
         <tbody>
         <tr>
-            <td>Name in ${h.link(req, ctx.societyset)}:</td>
+            <td>Name and ID in ${h.link(req, ctx.societyset)}:</td>
             <td>${ctx.name_in_source}</td>
         </tr>
         <tr>
@@ -68,6 +68,10 @@
         <tr>
             <td>Principal year to which data refer:</td>
             <td>${ctx.year}</td>
+        </tr>
+        <tr>
+            <td><a href="${req.route_url('glossary', _anchor='q9')}">Cross-societyset id</a>:</td>
+            <td>${ctx.xid}</td>
         </tr>
             % if ctx.hraf_id:
                 <tr>
@@ -84,7 +88,7 @@
             % endif
             % if ctx.related:
                 <tr>
-                    <td>Related societis in D-PLACE:</td>
+                    <td>Related societies in D-PLACE:</td>
                     <td>
                         <ul class="unstyled">
                             % for soc in ctx.related:

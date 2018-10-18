@@ -7,6 +7,7 @@
 <div class="row-fluid">
     <div class="span7">
         <h2>${ctx.name}</h2>
+        <p class="large"><strong>Description:</strong> ${ctx.description}</p>
         <ul class="nav nav-pills">
             <li class="">
                 <a href="${req.resource_url(ctx) if tree else ''}#map-container">
@@ -72,6 +73,8 @@
             <dl>
                 <dt>Dataset:</dt>
                 <dd>${h.link(request, ctx.dataset)}</dd>
+                <dt>Variable:</dt>
+                <dd>${ctx.name}</dd>
                 % if ctx.description:
                     <dt>Description:</dt>
                     <dd>${ctx.description}</dd>

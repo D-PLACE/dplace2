@@ -8,6 +8,7 @@ from clld.web.datatables.language import Languages
 from clld.web.datatables.contribution import Contributions, CitationCol
 from clld.web.datatables.parameter import Parameters
 from clld.web.datatables.value import Values, ValueNameCol
+from clld.web.datatables.source import Sources
 from clld.db.meta import DBSession
 from clld.db.util import get_distinct_values, icontains
 from clld.db.models import common
@@ -78,6 +79,9 @@ class SocietysetsCol(Col):
 
 
 class Datasets(Contributions):
+    def get_options(self):
+        return dict(aaSorting=[[1, 'asc'], [0, 'asc']])
+
     def col_defs(self):
         return [
             LinkCol(self, 'name'),
@@ -175,16 +179,12 @@ class Datapoints(Values):
         if self.parameter and self.parameter.domain:
             name_col.choices = [de.name for de in self.parameter.domain]
 
-        res = [
-            DetailsRowLinkCol(self, 'comment'),
-            name_col
-        ]
-
         if self.parameter:
             if self.parameter.type == 'Continuous':
                 res = [
-                    DetailsRowLinkCol(self, 'comment'),
                     FloatCol(self, 'value', model_col=Datapoint.value_float)]
+            else:
+                res = [name_col]
             res += [
                 LinkCol(self,
                         'language',
@@ -198,19 +198,21 @@ class Datapoints(Values):
                     get_object=lambda i: i.valueset.language),
                 LinkToMapCol(self, 'm', get_object=lambda i: i.valueset.language),
             ]
-
-        if self.language:
-            res += [
+        elif self.language:
+            res = [
                 LinkCol(self,
                         'parameter',
                         sTitle=self.req.translate('Parameter'),
                         model_col=common.Parameter.name,
                         get_object=lambda i: i.valueset.parameter),
+                name_col,
             ]
+        else:
+            res = [name_col]
 
         return res + [
-            #Col(self, 'comment', model_col=Datapoint.comment),
-            Col(self, 'year', model_col=Datapoint.year, sTitle='focal year', input_size='mini'),
+            DetailsRowLinkCol(self, 'comment', sTitle='Details', button_text='more'),
+            Col(self, 'year', model_col=Datapoint.year, sTitle='Focal year', input_size='mini'),
             Col(self, 'sub_case', model_col=Datapoint.sub_case, sTitle='Subcase'),
         ]
 
@@ -240,10 +242,22 @@ class Societysets(DataTable):
         ]
 
 
+class DplaceSources(Sources):
+    def col_defs(self):
+        return [
+            DetailsRowLinkCol(self, 'd', button_text='cite'),
+            LinkCol(self, 'name'),
+            Col(self, 'description', sTitle='Title'),
+            Col(self, 'year'),
+            Col(self, 'author'),
+        ]
+
+
 def includeme(config):
     config.register_datatable('languages', Societies)
     config.register_datatable('contributions', Datasets)
     config.register_datatable('societysets', Societysets)
     config.register_datatable('parameters', Variables)
     config.register_datatable('values', Datapoints)
+    config.register_datatable('sources', DplaceSources)
     config.register_datatable('phylogenys', DplacePhylogenies)
