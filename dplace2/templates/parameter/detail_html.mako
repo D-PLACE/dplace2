@@ -33,8 +33,8 @@
         </ul>
         <div id="tree-container" class="well well-small">
             <p>
-                You may display the datapoints for this variable on a given
-                phylogeny.
+                To display the datapoints on a tree, select a language phylogeny or classification here
+                then click "submit".
             </p>
             <form action="${request.route_url('variable_on_tree')}"
                   method="get"
