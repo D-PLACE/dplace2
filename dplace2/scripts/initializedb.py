@@ -14,7 +14,7 @@ from clldutils.misc import slug
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clld.lib.color import qualitative_colors, sequential_colors
+from clld.lib.color import qualitative_colors, sequential_colors, diverging_colors
 from clld.lib.bibtex import Database
 from pydplace.api import Repos
 
@@ -100,7 +100,7 @@ def main(args):  # pragma: no cover
     dscolors = qualitative_colors(len(repos.datasets))
     dss = {}
     altname_count = 0
-    for i, ds in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id))):
+    for i, ds in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id if d.id != 'EA' else 'AA'))):
         if ds.societies:
             societyset = data.add(
                 models.Societyset,
@@ -165,13 +165,19 @@ def main(args):  # pragma: no cover
                 batches = get_batches(codes)
                 ncolors = len(batches) if batches else len(codes)
                 colors = qualitative_colors(ncolors)
-                if v.type == 'Ordinal' and 3 <= ncolors <= 9:
-                    colors = sequential_colors(ncolors)
+                if v.type == 'Ordinal':
+                    codes = sorted(codes, key=lambda c: float(c.code))
+                    if 3 <= ncolors <= 9:
+                        colors = sequential_colors(ncolors)
+                    elif 10 <= ncolors <= 11:
+                        colors = diverging_colors(ncolors)
+                    elif ncolors > 11:
+                        colors = [color(float(codes[0].code), float(codes[-1].code), float(c.code)) for c in codes]
                 if batches:
                     icons = {}
-                    for batch, color in zip(batches, colors):
+                    for batch, color_ in zip(batches, colors):
                         for c, shape in batch:
-                            icons[c] = shape + color[1:]
+                            icons[c] = shape + color_[1:]
                 else:
                     icons = dict(zip([c.code for c in codes], ['c' + c.replace('#', '') for c in colors]))
                 for code in codes:

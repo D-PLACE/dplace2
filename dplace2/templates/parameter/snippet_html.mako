@@ -1,16 +1,14 @@
 <%namespace name="dplace" file="../dplace_util.mako"/>
-
-% if ctx.description:
-    <div class="alert">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <small><i>${ctx.description}</i></small>
-    </div>
-% endif
-
 % if ctx.domain:
-    ${dplace.codes_table(ctx, with_head=True, with_icon=True, with_repr=True, title_attr='name')}
+    ${dplace.codes_table(ctx, with_icon=True, with_repr=True)}
 % elif 'range' in ctx.jsondata or {}:
     <table>
+        <thead>
+        <tr>
+            <th colspan="2">Range:</th>
+        </tr>
+        </thead>
+        <tbody>
         % for number, color in ctx.jsondata['range']:
             <tr>
                 <td>
@@ -22,5 +20,6 @@
                 <td style="background-color: ${color}">&nbsp;&nbsp;&nbsp;</td>
             </tr>
         % endfor
+        </tbody>
     </table>
 % endif

@@ -83,15 +83,22 @@ ORDER BY vs DESC
     }
 
 
-class VariableMultiSelect(CombinationMultiSelect):
-    def get_options(self):
-        res = CombinationMultiSelect.get_options(self)
-        res['maximumSelectionSize'] = 4
-        return res
-
-
 def combination_detail_html(request=None, context=None, **kw):
     from dplace2.models import grouped_values
+
+    class VariableMultiSelect(CombinationMultiSelect):
+        def get_options(self):
+            res = CombinationMultiSelect.get_options(self)
+            res['maximumSelectionSize'] = 4
+            return res
+
+        @classmethod
+        def query(cls):
+            q = DBSession.query(models.Variable)
+            for p in context.parameters:
+                q = q.filter(models.Variable.pk.in_([v.pk for v in p.comparable_variables]))
+            return q
+
     return {
         'ms': VariableMultiSelect,
         'res': list(grouped_values(context)),

@@ -19,6 +19,10 @@
 
 <h2>About D-PLACE</h2>
 
+<p>
+    Wonder <a href="${req.route_url('glossary', _anchor='q0')}">how to get started using D-PLACE</a>?
+</p>
+
 
 <%util:section title="Overview" level="3" id="overview">
     <p>

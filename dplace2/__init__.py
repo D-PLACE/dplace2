@@ -72,6 +72,7 @@ def main(global_config, **settings):
     #/howto
     #/technology
 
+    config.add_301('/angular/', lambda req: req.route_url('dataset'))
     config.add_301('/home', lambda req: req.route_url('dataset'))
     config.add_301('/team', lambda req: req.route_url('about', _anchor='team'))
     config.add_301('/publication', lambda req: req.route_url('about', _anchor='publications'))

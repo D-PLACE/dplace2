@@ -1,7 +1,8 @@
 <%inherit file="../home_comp.mako"/>
+<%! active_menu_item = "dataset" %>
 
 <div class="span12" style="text-align: center">
-    <img style="width: 40%; margin-top: -30px; margin-bottom: -50px;"
+    <img style="width: 40%; margin-top: -2%; margin-bottom: -3%;"
          src="${request.static_url('dplace2:static/D-PLACE_Logo.png')}"/>
 
     <h2>Database of Places, Language, Culture and Environment</h2>

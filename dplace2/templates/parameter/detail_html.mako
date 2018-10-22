@@ -1,5 +1,6 @@
 <%inherit file="../${context.get('request').registry.settings.get('clld.app_template', 'app.mako')}"/>
 <%namespace name="util" file="../util.mako"/>
+<%namespace name="dplace" file="../dplace_util.mako"/>
 <%! active_menu_item = "parameters" %>
 <%block name="title">${_('Parameter')} ${ctx.name}</%block>
 <%! import json %>
@@ -8,6 +9,15 @@
     <div class="span7">
         <h2>${ctx.name}</h2>
         <p class="large"><strong>Description:</strong> ${ctx.description}</p>
+
+        % if ctx.domain:
+        <div class="accordion" id="codes-accordion">
+                <%util:accordion_group eid="acc-codes" parent="codes-accordion" title="${_('Codes [click for detailed code description]')}">
+                    ${dplace.codes_table(ctx)}
+                </%util:accordion_group>
+        </div>
+        % endif
+
         <ul class="nav nav-pills">
             <li class="">
                 <a href="${req.resource_url(ctx) if tree else ''}#map-container">

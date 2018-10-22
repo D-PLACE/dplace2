@@ -45,6 +45,16 @@ class CategoryCol(Col):
         return HTML.ul(*[HTML.li(n) for n in sorted(item.categories_str.split('|'))])
 
 
+class VarIdCol(LinkCol):
+    def order(self):
+        return Variable.id
+
+
+class DatasetIdCol(LinkCol):
+    def order(self):
+        return DplaceDataset.pk
+
+
 class Variables(Parameters):
     __constraints__ = {common.Contribution}
 
@@ -54,15 +64,21 @@ class Variables(Parameters):
             query = query.filter(Variable.dataset_pk == self.contribution.pk)
         return query.distinct()
 
+    def get_options(self):
+        if not self.contribution:
+            return dict(aaSorting=[[5, 'asc'], [0, 'asc']])
+
     def col_defs(self):
         res = [
-            LinkCol(self, 'name'),
+            VarIdCol(self, 'name', sTitle='Name [ID]'),
+            Col(self, 'description'),
+            DetailsRowLinkCol(self, 'codes', button_text='codes'),
             Col(self, 'type', choices=get_distinct_values(Variable.type), model_col=Variable.type),
             CategoryCol(self, 'category', sTitle='Theme'),
         ]
         if not self.contribution:
             res.append(
-                LinkCol(
+                DatasetIdCol(
                     self,
                     'dataset',
                     choices=sorted((c for c, in DBSession.query(DplaceDataset.name).distinct())),
