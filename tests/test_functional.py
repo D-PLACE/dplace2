@@ -7,6 +7,7 @@ import pytest
         ('get_html', '/'),
         ('get_html', '/legal'),
         ('get_html', '/download'),
+        ('get_html', '/source'),
         ('get_html', '/societysets'),
         ('get_html', '/societysets/EA'),
         ('get_html', '/contributions/EA'),
@@ -22,6 +23,12 @@ import pytest
         ('get_html', '/valuesets/SCCS1716-SCCS100.snippet.html'),
         ('get_html', '/values/SCCS1716-SCCS100-1.snippet.html'),
         ('get_html', '/combinations/SCCS1716_SCCS1717'),
+        ('get_html', '/combinations/B015_B005'),
+        ('get_dt', '/languages'),
+        ('get_dt', '/values'),
+        ('get_dt', '/values?language=B10'),
+        ('get_dt', '/values?parameter=B015'),
+        ('get_dt', '/values?contribution=WNAI'),
     ])
 def test_pages(app, method, path):
     getattr(app, method)(path)

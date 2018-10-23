@@ -209,10 +209,6 @@ def get_icon(ctx):
             icon = ctx.domainelement.icon
         elif 'color' in ctx.jsondatadict:
             icon = 's' + ctx.jsondata['color'][1:]
-        else:
-            print(ctx.valueset.parameter)
-            print(ctx.valueset.language)
-            raise ValueError(ctx)
     elif isinstance(ctx, DomainElement):
         icon = ctx.icon
     elif isinstance(ctx, Language):
