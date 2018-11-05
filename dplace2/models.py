@@ -215,4 +215,6 @@ def get_icon(ctx):
         icon = 'c' + ctx.societyset.color[1:]
     elif isinstance(ctx, Societyset):
         icon = 'c' + ctx.color[1:]
+    if icon is None:
+        icon = 'tff0000'
     return icon
