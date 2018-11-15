@@ -196,7 +196,7 @@ class Datapoints(Values):
             name_col.choices = [de.name for de in self.parameter.domain]
 
         if self.parameter:
-            if self.parameter.type == 'Continuous':
+            if self.parameter.type in ['Continuous', 'Ordinal']:
                 res = [
                     FloatCol(self, 'value', model_col=Datapoint.value_float)]
             else:

@@ -47,6 +47,8 @@ class DplaceCtxFactoryQuery(CtxFactoryQuery):
             return query.options(joinedload(models.DplaceDataset.variables))
         if model == models.Societyset:
             return query.options(joinedload(models.Societyset.societies))
+        if model == common.Parameter:
+            return query.options(joinedload(common.Parameter.domain))
         return query
 
 

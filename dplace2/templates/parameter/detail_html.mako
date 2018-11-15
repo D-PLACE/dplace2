@@ -89,42 +89,46 @@
                     <dt>Description:</dt>
                     <dd>${ctx.description}</dd>
                 % endif
-                <dt>Values:</dt>
-                <dd>
-                    % if ctx.domain:
-                        <table class="table table-condensed">
-                            % for de in ctx.domain:
-                                <tr>
-                                    <td>${h.map_marker_img(req, de, width=25, height=25)}</td>
-                                    <td>${de.number}</td>
-                                    <td>${de}</td>
-                                    <td class="right">${len(de.values)}</td>
-                                </tr>
-                            % endfor
-                        </table>
-                    % elif 'range' in ctx.jsondata or {}:
-                        <table>
-                            % for number, color in ctx.jsondata['range']:
-                                <tr>
-                                    <td style="background-color: ${color}; padding-right: 10px;">&nbsp;&nbsp;&nbsp;</td>
-                                    <td style="padding-left: 10px;">
-                                        % if loop.first or loop.last:
+                % if ctx.id != 'EcoRegion':
+                    <dt>Values:</dt>
+                    <dd>
+                        % if ctx.domain:
+                            <table class="table table-condensed">
+                                % for de in ctx.domain:
+                                    <tr>
+                                        <td>${h.map_marker_img(req, de, width=25, height=25)}</td>
+                                        <td>${de.number}</td>
+                                        <td>${de}</td>
+                                        <td class="right">${len(de.values)}</td>
+                                    </tr>
+                                % endfor
+                            </table>
+                        % elif 'range' in ctx.jsondata or {}:
+                            <table>
+                                % for number, color in ctx.jsondata['range']:
+                                    <tr>
+                                        <td style="background-color: ${color}; padding-right: 10px;">&nbsp;&nbsp;&nbsp;</td>
+                                        <td style="padding-left: 10px;">
+                                            % if loop.first or loop.last:
                                             ${'{0:,}'.format(number)}
-                                        % endif
-                                    </td>
-                                </tr>
-                            % endfor
-                        </table>
-                    % endif
-                </dd>
+                                            % endif
+                                        </td>
+                                    </tr>
+                                % endfor
+                            </table>
+                        % endif
+                    </dd>
+                % endif
             </dl>
 
         </div>
     </div>
 </div>
 
-% if map_ or request.map:
-    ${(map_ or request.map).render()}
+% if ctx.id != 'EcoRegion':
+    % if map_ or request.map:
+        ${(map_ or request.map).render()}
+    % endif
 % endif
 
 <div id="table-container">
