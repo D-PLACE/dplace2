@@ -188,6 +188,40 @@ class Datapoint(CustomModelMixin, Value):
             res += ' [{0}]'.format(self.sub_case)
         return res.strip()
 
+    @classmethod
+    def csv_head(cls):
+        return [
+            'society_id',
+            'society_name',
+            'society_xd_id',
+            'language_glottocode',
+            'language_name',
+            'language_family',
+            'variable_id',
+            'code',
+            'code_label',
+            'focal_year',
+            'sub_case',
+            'comment',
+        ]
+
+    def to_csv(self, ctx=None, req=None, cols=None):
+        return [
+            self.valueset.language.id,
+            self.valueset.language.name,
+            self.valueset.language.xid,
+            self.valueset.language.glottocode,
+            self.valueset.language.language,
+            self.valueset.language.language_family,
+            self.valueset.parameter.id,
+            self.value_float if self.valueset.parameter.type == 'Continuous' else
+            (self.domainelement.id.split('-', 1)[1] if self.domainelement else self.name),
+            self.domainelement.name if self.domainelement else '',
+            self.year,
+            self.sub_case,
+            self.comment,
+        ]
+
 
 class DatapointReference(Base, HasSourceNotNullMixin):
     __table_args__ = (UniqueConstraint('value_pk', 'source_pk', 'description'),)

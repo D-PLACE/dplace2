@@ -20,6 +20,7 @@ import pytest
         ('get_html', '/phylogenys/bouckaert_et_al2018?parameter=SCCS1'),
         ('get_html', '/sources/abbott1892'),
         ('get_html', '/parameters/SCCS1'),
+        ('get', '/parameters/SCCS1.csv'),
         ('get_json', '/parameters/SCCS1.geojson'),
         ('get_json', '/parameters/B015.geojson'),
         ('get_json', '/parameters/NetPrimaryProductionConstancy.geojson'),

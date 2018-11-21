@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 from pyramid.config import Configurator
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, joinedload_all
 from clld.web.app import CtxFactoryQuery
-from clld.interfaces import ICtxFactoryQuery, IMapMarker
+from clld.interfaces import ICtxFactoryQuery, IMapMarker, IRepresentation, IParameter, IIndex
 from clld.db.models import common
 from clld.web.icon import MapMarker
 from clld.lib import svg
@@ -48,7 +48,11 @@ class DplaceCtxFactoryQuery(CtxFactoryQuery):
         if model == models.Societyset:
             return query.options(joinedload(models.Societyset.societies))
         if model == common.Parameter:
-            return query.options(joinedload(common.Parameter.domain))
+            return query.options(
+                joinedload(common.Parameter.domain),
+                joinedload_all(common.Parameter.valuesets, common.ValueSet.values),
+                joinedload(common.Parameter.valuesets, common.ValueSet.language),
+            )
         return query
 
 
@@ -69,6 +73,16 @@ def main(global_config, **settings):
     config.register_resource('societyset', models.Societyset, ISocietyset, with_index=True)
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
+
+    config.register_adapter(
+        adapters.VariableCsvAdapter,
+        IParameter,
+        IRepresentation,
+        name=adapters.VariableCsvAdapter.mimetype)
+    #config.register_adapter(None, IParameter, IIndex, name='application/atom+xml')
+    print(config.registry.unregisterAdapter(required=[IParameter], provided=IIndex, name='application/atom+xml'))
+    print('haha')
+
     config.add_route('variable_on_tree', '/variable_on_tree')
     config.add_route('datasources', '/source')
     #/howto

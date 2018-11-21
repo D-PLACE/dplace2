@@ -57,6 +57,7 @@ class DatasetIdCol(LinkCol):
 
 class Variables(Parameters):
     __constraints__ = {common.Contribution}
+    __toolbar_kw__ = dict(exclude=['csv', 'atom', 'xls', 'html', 'csv-metadata.json', 'json'])
 
     def base_query(self, query):
         query = query.join(DplaceDataset).options(joinedload(Variable.dataset))
@@ -95,6 +96,8 @@ class SocietysetsCol(Col):
 
 
 class Datasets(Contributions):
+    __toolbar_kw__ = dict(exclude=['csv', 'atom', 'xls', 'html', 'csv-metadata.json', 'json'])
+
     def get_options(self):
         return dict(aaSorting=[[1, 'asc'], [0, 'asc']])
 
@@ -124,6 +127,7 @@ class Datasets(Contributions):
 
 class Societies(Languages):
     __constraints__ = {Societyset}
+    __toolbar_kw__ = dict(exclude=['csv', 'atom', 'xls', 'html', 'csv-metadata.json', 'json'])
 
     def base_query(self, query):
         query = query.join(Societyset).options(joinedload(Society.societyset))
@@ -169,6 +173,8 @@ class FloatCol(Col):
 
 
 class Datapoints(Values):
+    __toolbar_kw__ = dict(exclude=['atom', 'xls', 'rdf', 'html', 'csv-metadata.json', 'json'])
+
     def base_query(self, query):
         query = query.join(common.ValueSet).options(
             joinedload_all(Datapoint.references, DatapointReference.source)
@@ -234,6 +240,8 @@ class Datapoints(Values):
 
 
 class DplacePhylogenies(Phylogenies):
+    __toolbar_kw__ = dict(exclude=['csv', 'atom', 'xls', 'html', 'csv-metadata.json', 'json'])
+
     def col_defs(self):
         return [
             LinkCol(self, 'name'),
@@ -250,6 +258,8 @@ class DplacePhylogenies(Phylogenies):
 
 
 class Societysets(DataTable):
+    __toolbar_kw__ = dict(exclude=['csv', 'atom', 'xls', 'html', 'csv-metadata.json', 'json'])
+
     def col_defs(self):
         return [
             LinkCol(self, 'name'),
@@ -259,6 +269,8 @@ class Societysets(DataTable):
 
 
 class DplaceSources(Sources):
+    __toolbar_kw__ = dict(exclude=['csv', 'atom', 'xls', 'html', 'csv-metadata.json', 'json'])
+
     def col_defs(self):
         return [
             DetailsRowLinkCol(self, 'd', button_text='cite'),

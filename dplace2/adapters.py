@@ -1,12 +1,29 @@
+from itertools import chain
+
 from sqlalchemy.orm import joinedload_all, joinedload
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.interfaces import IParameter
 from clld.web.adapters.geojson import GeoJson, GeoJsonParameter
+from clld.web.adapters.csv import CsvAdapter
+from clld.interfaces import IIndex
 from clld_phylogeny_plugin.tree import Tree
 from clld_phylogeny_plugin.interfaces import ITree
+from csvw.dsv import UnicodeWriter
 
 from dplace2.models import get_icon
+
+
+class VariableCsvAdapter(CsvAdapter):
+    def render(self, ctx, req):
+        cols = None
+        with UnicodeWriter() as writer:
+            for v in chain(*[vs.values for vs in ctx.valuesets]):
+                if not cols:
+                    cols = v.csv_head()
+                    writer.writerow(cols)
+                writer.writerow(v.to_csv(ctx=ctx, req=req, cols=cols))
+            return writer.read()
 
 
 class VariableTree(Tree):

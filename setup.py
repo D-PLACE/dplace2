@@ -19,7 +19,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clld>=4.4.0',
+        'clld>=4.4.2',
         'clldmpg>=3.3.1',
         'clld_phylogeny_plugin>=1.3.0',
         'sqlalchemy',
