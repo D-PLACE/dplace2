@@ -1,6 +1,6 @@
 from itertools import chain
 
-from sqlalchemy.orm import joinedload_all, joinedload
+from sqlalchemy.orm import joinedload
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.interfaces import IParameter
@@ -48,7 +48,7 @@ class GeoJsonVariable(GeoJsonParameter):
                 .join(common.DomainElement)\
                 .filter(common.DomainElement.id == de)\
                 .options(
-                    joinedload_all(common.ValueSet.values, common.Value.domainelement),
+                    joinedload(common.ValueSet.values).joinedload(common.Value.domainelement),
                     joinedload(common.ValueSet.language),
                 )\
                 .distinct()

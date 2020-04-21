@@ -1,12 +1,10 @@
-from __future__ import unicode_literals
-
 from pyramid.config import Configurator
-from sqlalchemy.orm import joinedload, joinedload_all
+from sqlalchemy.orm import joinedload
 from clld.web.app import CtxFactoryQuery
 from clld.interfaces import ICtxFactoryQuery, IMapMarker, IRepresentation, IParameter, IIndex
 from clld.db.models import common
 from clld.web.icon import MapMarker
-from clld.lib import svg
+from clldutils import svg
 
 # we must make sure custom models are known at database initialization!
 from dplace2 import models
@@ -50,7 +48,7 @@ class DplaceCtxFactoryQuery(CtxFactoryQuery):
         if model == common.Parameter:
             return query.options(
                 joinedload(common.Parameter.domain),
-                joinedload_all(common.Parameter.valuesets, common.ValueSet.values),
+                joinedload(common.Parameter.valuesets).joinedload(common.ValueSet.values),
                 joinedload(common.Parameter.valuesets, common.ValueSet.language),
             )
         return query

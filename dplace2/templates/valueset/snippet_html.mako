@@ -11,7 +11,7 @@
         <li>
             <h4>
                 ${h.map_marker_img(request, value)}
-                ${value.__unicode__()}
+                ${value}
                 % if value.frequency > 1:
                     (${int(value.frequency)} estimates)
                 % endif

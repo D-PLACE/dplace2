@@ -18,7 +18,7 @@ from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin, PolymorphicBaseMixin
 from clld.db.models.common import (
     Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin, Value,
-    ValueSet, Combination,
+    ValueSet,
 )
 from clld.db.models.source import HasSourceNotNullMixin
 

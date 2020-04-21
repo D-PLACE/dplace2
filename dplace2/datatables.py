@@ -1,6 +1,4 @@
-from __future__ import unicode_literals
-
-from sqlalchemy.orm import joinedload, joinedload_all
+from sqlalchemy.orm import joinedload
 from clld.web.datatables.base import (
     Col, LinkCol, LinkToMapCol, IdCol, DetailsRowLinkCol, RefsCol, DataTable,
 )
@@ -177,7 +175,7 @@ class Datapoints(Values):
 
     def base_query(self, query):
         query = query.join(common.ValueSet).options(
-            joinedload_all(Datapoint.references, DatapointReference.source)
+            joinedload(Datapoint.references).joinedload(DatapointReference.source)
         )
 
         if self.language:

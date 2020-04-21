@@ -3,7 +3,7 @@ from clld.db.meta import DBSession
 from clld.web.util.helpers import map_marker_img
 from clld.web.util.htmllib import HTML
 from clld.web.adapters.geojson import GeoJson
-from clld.lib.svg import pie, data_url
+from clldutils.svg import pie, data_url
 
 from dplace2.models import Societyset, Society, get_icon, grouped_values
 

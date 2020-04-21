@@ -1,20 +1,19 @@
-from __future__ import unicode_literals
 import sys
 from itertools import groupby, chain
 import re
 from colorsys import hsv_to_rgb
 from collections import defaultdict, OrderedDict
 import math
+from pathlib import Path
 
 import transaction
 from sqlalchemy import func, distinct
-from sqlalchemy.orm import joinedload_all, joinedload
-from clldutils.path import Path
+from sqlalchemy.orm import joinedload
 from clldutils.misc import slug
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clld.lib.color import qualitative_colors, sequential_colors, diverging_colors
+from clldutils.color import qualitative_colors, sequential_colors, diverging_colors
 from clld.lib.bibtex import Database
 from pydplace.api import Repos
 
@@ -366,13 +365,13 @@ def prime_cache(args):  # pragma: no cover
     it will have to be run periodically whenever data has been updated.
     """
     for var in DBSession.query(models.Variable).options(
-        joinedload_all(models.Variable.category_assocs, models.VariableCategory.category)
+        joinedload(models.Variable.category_assocs).joinedloadd(models.VariableCategory.category)
     ):
         var.categories_str = '|'.join(ca.category.name for ca in var.category_assocs)
 
     socs_by_var = {}
     for var in DBSession.query(models.Variable)\
-            .options(joinedload_all(models.Variable.valuesets, common.ValueSet.values)):
+            .options(joinedload(models.Variable.valuesets).joinedload(common.ValueSet.values)):
         socs_by_var[var.pk] = set(vs.language_pk for vs in var.valuesets)
         if var.type != 'Continuous':
             continue
@@ -448,7 +447,8 @@ group by l.pk""")}
         for spk in sspks:
             DBSession.add(common.LanguageSource(language_pk=lpk, source_pk=spk))
 
-    for phy in DBSession.query(Phylogeny).options(joinedload_all(Phylogeny.treelabels, TreeLabel.language_assocs)):
+    for phy in DBSession.query(Phylogeny).options(
+            joinedload(Phylogeny.treelabels).joinedload(TreeLabel.language_assocs)):
         soc_set = defaultdict(list)
         for tl in phy.treelabels:
             for la in tl.language_assocs:
