@@ -10,7 +10,7 @@ import transaction
 from sqlalchemy import func, distinct
 from sqlalchemy.orm import joinedload
 from clldutils.misc import slug
-from clld.scripts.util import initializedb, Data, bibtex2source
+from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clldutils.color import qualitative_colors, sequential_colors, diverging_colors
@@ -22,6 +22,7 @@ from dplace2 import models
 from clld_phylogeny_plugin.models import TreeLabel, LanguageTreeLabel, Phylogeny
 
 DATA_REPOS = Path(dplace2.__file__).parent / '..' / '..' / 'dplace-data'
+
 biomes = {
     '01': '#00ff00',
     '02': '#b2e519',
@@ -90,7 +91,7 @@ def main(args):  # pragma: no cover
         common.Editor(dataset=dataset, contributor=ed, ord=i + 1)
     DBSession.add(dataset)
 
-    for rec in Database.from_file(repos.path('datasets', 'sources.bib'), lowercase=True):
+    for rec in Database.from_file(repos.path('sources.bib'), lowercase=True):
         data.add(common.Source, rec.id, _obj=bibtex2source(rec))
 
     regions = repos.read_json('geo', 'societies_tdwg.json')
@@ -275,7 +276,7 @@ def main(args):  # pragma: no cover
 
     year_pattern = re.compile('(?P<year>-?[0-9]+)')
     for cid, ds in dss.items():
-        print(cid)
+        args.log.info('processing dataset ' + cid)
         transaction.begin()
         dsdata = Data()
         c = models.DplaceDataset.get(cid)
@@ -364,8 +365,9 @@ def prime_cache(args):  # pragma: no cover
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
     """
+    args.log.info('processing prine cache')
     for var in DBSession.query(models.Variable).options(
-        joinedload(models.Variable.category_assocs).joinedloadd(models.VariableCategory.category)
+        joinedload(models.Variable.category_assocs).joinedload(models.VariableCategory.category)
     ):
         var.categories_str = '|'.join(ca.category.name for ca in var.category_assocs)
 
@@ -396,7 +398,6 @@ def prime_cache(args):  # pragma: no cover
         if dist[0] > (10 * dist[-1]):
             # If there are a lot more values in the first bucket in comparison to the last one,
             # we assume a logarithmic scale.
-            print(var.name)
             log = True
             cminimum = mlog(minimum)
             cmaximum = mlog(maximum)
