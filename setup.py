@@ -21,7 +21,7 @@ setup(
     install_requires=[
         'clld>=6',
         'clldmpg>=3.5',
-        'clld_phylogeny_plugin>=1.3.0',
+        'clld_phylogeny_plugin>=1.4.1',
         'sqlalchemy',
         'waitress',
     ],

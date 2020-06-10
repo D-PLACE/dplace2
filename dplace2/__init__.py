@@ -78,8 +78,7 @@ def main(global_config, **settings):
         IRepresentation,
         name=adapters.VariableCsvAdapter.mimetype)
     #config.register_adapter(None, IParameter, IIndex, name='application/atom+xml')
-    print(config.registry.unregisterAdapter(required=[IParameter], provided=IIndex, name='application/atom+xml'))
-    print('haha')
+    config.registry.unregisterAdapter(required=[IParameter], provided=IIndex, name='application/atom+xml')
 
     config.add_route('variable_on_tree', '/variable_on_tree')
     config.add_route('datasources', '/source')
