@@ -47,6 +47,7 @@ def test_pages(app, method, path):
 
 
 def test_redirects(app):
+    app.get('/variable_on_tree', status=404)
     app.get('/home', status=301)
     app.get('/team', status=301)
     app.get('/publication', status=301)

@@ -10,7 +10,7 @@ import transaction
 from sqlalchemy import func, distinct
 from sqlalchemy.orm import joinedload
 from clldutils.misc import slug
-from clld.scripts.util import initializedb, Data, bibtex2source
+from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clldutils.color import qualitative_colors, sequential_colors, diverging_colors
@@ -462,8 +462,3 @@ group by l.pk""")}
         for vpk, socs in socs_by_var.items():
             if soc_set.intersection(socs):
                 DBSession.add(models.VariablePhylogeny(variable_pk=vpk, phylogeny_pk=phy.pk))
-
-
-if __name__ == '__main__':  # pragma: no cover
-    initializedb(create=main, prime_cache=prime_cache)
-    sys.exit(0)
