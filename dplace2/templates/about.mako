@@ -132,12 +132,47 @@
 <%util:section title="Publications" level="3" id="publications">
 
     <ul>
+        <li>
+            Hannah J Haynie, Patrick H Kavanagh, Fiona M Jordan, Carol R Ember, Russell D Gray, Simon J Greenhill, Kathryn R Kirby, Geoff Kushnick, Bobbi S Low, Ty Tuff, Bruno Vilela, Carlos A Botero, Michael C Gavin. (2021).
+            Pathways to social inequality. Evolutionary Human Sciences, 3, e35, 1-14.
+            ${h.external_link('https://doi.org/10.1017/ehs.2021.32', label='DOI: 10.1017/ehs.2021.32')}
+        </li>
+        <li>
+            Vilela, B.; Fristoe, T.; Tuff, T.; Kavanagh, P. H.; Haynie, H. J.; Gray, R. D.; Gavin, M. C.; Botero, C. A.:
+            Cultural transmission and ecological opportunity jointly shaped global patterns of reliance on agriculture.
+            Evolutionary Human Sciences 2, e53, pp. 1 - 11 (2020)
+            ${h.external_link('https://doi.org/10.1017/ehs.2020.55', label='DOI: 10.1017/ehs.2020.55')}
+        </li>
+        <li>
+            Coelho, M. T. P., Pereira, E. B., Haynie, H. J., Rangel, T. F., Kavanagh, P., Kirby, K., et al. (2019).
+            Drivers of geographical patterns of North American language diversity. Proceedings of the Royal Society B:
+            Biological Sciences, 286(1899): 20190242.
+            ${h.external_link('https://doi.org/10.1098/rspb.2019.0242', label='DOI: 10.1098/rspb.2019.0242')}
+        </li>
+        <li>
+            Moravec, J. C., Atkinson, Q. D., Bowern, C., Greenhill, S. J., Jordan, F. M., Ross, R., Gray, R. D.,
+            Marsland, S. and Cox, M. P. (2018). Post-marital residence patterns show lineage-specific evolution.
+            Evolution and Human Behavior, 39(6): 594–601.
+            ${h.external_link('https://doi.org/10.1016/j.evolhumbehav.2018.06.002', label='DOI: 10.1016/j.evolhumbehav.2018.06.002')}
+        </li>
+        <li>
+            Gavin, MC, Kavanagh PK, Haynie HJ, Bowern C, Ember CR, Gray RD, Jordan FM, Kirby KR, Kushnick G, Low BS,
+            Vilela B, Botero CA. 2018. The global geography of human subsistence. Royal Society Open Science 5: 171897.
+            ${h.external_link('https://doi.org/10.1098/rsos.171897', label='DOI: 10.1098/rsos.171897')}
+        </li>
+        <li>
+            Kavanagh, P.H., Vilela, B., Haynie, H.J., Tuff, T., Lima-Ribeiro, M., Gray, R.D., Botero, C.A., and Gavin,
+            M.C. 2018. Hindcasting global population densities reveals forces enabling the origin of agriculture, Nature
+            Human Behaviour 2: 478-484.
+            ${h.external_link('https://doi.org/10.1038/s41562-018-0358-8', label='DOI: 10.1038/s41562-018-0358-8')}
+        </li>
         <li>Kirby, K.R., Gray, R. D., Greenhill, S. J., Jordan, F. M., Gomes-Ng, S., Bibiko, H-J, et al. (2016).
             D-PLACE: A Global Database of Cultural, Linguistic and Environmental Diversity. PLoS ONE, 11(7): e0158391.
-            <a href="https://doi.org/10.1371/journal.pone.0158391">doi:10.1371/journal.pone.0158391</a>.
+            ${h.external_link('https://doi.org/10.1371/journal.pone.0158391', label='DOI: 10.1371/journal.pone.0158391')}
         </li>
         <li>Botero, C. A., Gardner, B., Kirby, K. R., Bulbulia, J., Gavin, M. C., & Gray, R. D. (2014). The ecology of
             religious beliefs. Proceedings of the National Academy of Sciences, 111(47), 16784-16789.
+            ${h.external_link('https://doi.org/10.1073/pnas.1408701111', label='DOI: 10.1073/pnas.1408701111')}
         </li>
     </ul>
 

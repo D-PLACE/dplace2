@@ -154,7 +154,8 @@ class Variable(CustomModelMixin, Parameter):
 class DplacePhylogeny(CustomModelMixin, Phylogeny, WithSourceMixin):
     pk = Column(Integer, ForeignKey('phylogeny.pk'), primary_key=True)
     glottolog = Column(Boolean)
-    variables = relationship(Variable, secondary=VariablePhylogeny.__table__)
+    variables = relationship(
+        Variable, secondary=VariablePhylogeny.__table__, overlaps='phylogenies')
 
 
 class VariableCategory(Base):
