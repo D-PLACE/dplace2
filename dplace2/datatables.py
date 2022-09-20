@@ -171,7 +171,10 @@ class FloatCol(Col):
 
 
 class Datapoints(Values):
-    __toolbar_kw__ = dict(exclude=['atom', 'xls', 'rdf', 'html', 'csv-metadata.json', 'json'])
+    __toolbar_kw__ = dict(
+        exclude=['atom', 'xls', 'rdf', 'html', 'csv-metadata.json', 'json'],
+        dl_formats={'csv': 'CSV'}
+    )
 
     def base_query(self, query):
         query = query.join(common.ValueSet).options(

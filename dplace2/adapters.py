@@ -25,6 +25,11 @@ class VariableCsvAdapter(CsvAdapter):
                 writer.writerow(v.to_csv(ctx=ctx, req=req, cols=cols))
             return writer.read()
 
+    def render_to_response(self, ctx, req):
+        res = super(CsvAdapter, self).render_to_response(ctx, req)
+        res.content_disposition = 'attachment; filename="dplace_variable_%s.csv"' % ctx.id
+        return res
+
 
 class VariableTree(Tree):
     def get_marker(self, valueset):
