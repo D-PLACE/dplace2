@@ -53,7 +53,7 @@ class DplaceCombinationMap(CombinationMap):
             label='Variable')
 
     def get_default_options(self):
-        return {'hash': True, 'icon_size': 15, 'base_layer': "Esri.WorldPhysical"}
+        return {'hash': True, 'icon_size': 15}
 
 
 class LanguagesMap(Map):
@@ -80,7 +80,7 @@ class LanguagesMap(Map):
             'hash': True, 
             'icon_size': 15, 
             'resize_direction': 's',
-            'base_layer': "Esri.WorldPhysical"}
+        }
 
 
 class VariableMap(ParameterMap):
@@ -89,7 +89,7 @@ class VariableMap(ParameterMap):
             'hash': True, 
             'icon_size': 15, 
             'resize_direction': 's',
-            'base_layer': "Esri.WorldPhysical"}
+        }
 
 
 def includeme(config):
