@@ -190,8 +190,7 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Hans-Jörg Bibiko</strong></li>
-                <li>${h.external_link('https://www.shh.mpg.de/employees/42541/55811')}</li>
-                <li>${h.external_link('http://www.bibiko.de')}</li>
+                <li>${h.external_link('https://www.eva.mpg.de/linguistic-and-cultural-evolution/staff/hans-joerg-bibiko/')}</li>
             </ul>
         </div>
         <div class="span3" style="text-align: right">
@@ -214,7 +213,7 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Carlos Botero</strong></li>
-                <li>${h.external_link('http://pages.wustl.edu/botero')}</li>
+                <li>${h.external_link('https://boterolab.weebly.com/')}</li>
             </ul>
         </div>
 
@@ -247,7 +246,7 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Robert Forkel</strong></li>
-                <li>${h.external_link('http://www.shh.mpg.de/employees/45369/55811')}</li>
+                <li>${h.external_link('https://www.eva.mpg.de/linguistic-and-cultural-evolution/staff/robert-forkel/')}</li>
             </ul>
         </div>
     </div>
@@ -280,8 +279,8 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Russell Gray</strong></li>
-                <li>${h.external_link('http://www.shh.mpg.de/2923/russellgray')}</li>
-                <li>${h.external_link('http://www.psych.auckland.ac.nz/people/rd-gray')}</li>
+                <li>${h.external_link('https://www.eva.mpg.de/linguistic-and-cultural-evolution/staff/russell-gray/')}</li>
+                <li>${h.external_link('https://profiles.auckland.ac.nz/rd-gray')}</li>
             </ul>
         </div>
         <div class="span3" style="text-align: right">
@@ -291,7 +290,7 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Simon Greenhill</strong></li>
-                <li>${h.external_link('http://researchers.anu.edu.au/researchers/greenhill-s')}</li>
+                <li>${h.external_link('https://profiles.auckland.ac.nz/simon-greenhill')}</li>
                 <li>${h.external_link('http://simon.net.nz/')}</li>
             </ul>
         </div>
@@ -303,8 +302,7 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Fiona Jordan</strong></li>
-                <li>${h.external_link('http://www.bristol.ac.uk/school-of-arts/')}</li>
-                <li>${h.external_link('http://people/fiona-m-jordan/')}</li>
+                <li>${h.external_link('https://www.bristol.ac.uk/people/person/Fiona-Jordan-ff4820d0-9a45-487d-83d6-f14c30bfde34/')}</li>
             </ul>
         </div>
         <div class="span3" style="text-align: right">
@@ -332,7 +330,7 @@
         <div class="span3" style="text-align: left">
             <ul class="unstyled">
                 <li><strong>Bobbi Low</strong></li>
-                <li>${h.external_link('http://snre.umich.edu/profile/bobbilow')}</li>
+                <li>${h.external_link('https://seas.umich.edu/research/faculty/bobbi-s-low')}</li>
             </ul>
         </div>
     </div>
