@@ -72,11 +72,11 @@ def main(args):  # pragma: no cover
     dataset = common.Dataset(
         id=dplace2.__name__,
         name="D-PLACE",
-        publisher_name="Max Planck Institute for the Science of Human History",
-        publisher_place="Jena",
-        publisher_url="https://www.shh.mpg.de",
+        publisher_name="Max Planck Institute for Evolutionary Anthropology",
+        publisher_place="Leipzig",
+        publisher_url="https://www.eva.mpg.de",
         license="http://creativecommons.org/licenses/by-nc/4.0/",
-        contact='dplace@shh.mpg.de',
+        contact='dplace@eva.mpg.de',
         domain='dplace2.clld.org',
         jsondata={
             'license_icon': 'cc-by-nc.png',
