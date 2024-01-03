@@ -94,7 +94,9 @@ class Society(CustomModelMixin, Language):
 
     @property
     def related(self):
-        return DBSession.query(Society).filter(Society.xid == self.xid and Society.pk != self.pk)
+        if self.xid:
+            return DBSession.query(Society).filter(Society.xid == self.xid and Society.pk != self.pk)
+        return []
 
     @property
     def hraf_url(self):
