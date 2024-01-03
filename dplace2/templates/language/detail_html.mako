@@ -81,7 +81,7 @@
                         <a href="${ctx.hraf_url}">
                             <img width="18" style="margin-top: -2px"
                                  src="${request.static_url('dplace2:static/hrafLogoBlue_inverted.png')}">
-                            ${'{0} ({1})'.format(ctx.hraf_name, ctx.hraf_id)}
+                            ${'{}'.format(ctx.hraf_name)}
                         </a>
                     </td>
                 </tr>

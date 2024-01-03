@@ -21,19 +21,14 @@
 
     <p>
         D-PLACE contains cultural, linguistic, environmental and geographic information
-        for over 1400 human cultural groups. This data is aggregated from a number of
+        for over 2000 human cultural groups. This data is aggregated from a number of
         <a href="${req.route_url('contributions')}">datasets</a>.
     </p>
 
 <%util:section title="Cultural data" level="4" id="cultural_data">
     <p>
-        D-PLACE includes cultural data from four major cross-cultural datasets: the
-        Ethnographic Atlas (Murdock 1962-1971; Barry 1980; Gray 1999; Korotayev et al. 2004; Bondarenko et al. 2005),
-        the Binford Hunter-Gatherer dataset (Binford 2001; Binford and Johnson 2006) (as described in
-        ${h.external_link('https://doi.org/10.1371/journal.pone.0158391', label='Kirby et al. (2016)')}),
-        the Standard Cross Cultural Sample (White and Murdock 1969) and the
-        Western North American Indians dataset (Jorgensen 1980, 1999a and 1999b).
-        All four datasets use codes to characterize the cultural practices of a ‘society’, or group of people with a
+        D-PLACE aggregates cultural data from several major cross-cultural datasets.
+        All datasets use codes to characterize the cultural practices of a ‘society’, or group of people with a
         shared language and cultural identity at a given location and point in time.
     </p>
     <p>
@@ -66,10 +61,10 @@
 
     <p>
         In order to facilitate access to supplementary cultural data for D-PLACE societies, we provide information on
-        whether each society appears in other major cross-cultural databases. In addition ot the four datasets described
-        above, we have included links to the Human Relations Area Files (HRAF) (Murdock 1983), a repository of annotated
+        whether each society appears in other major cross-cultural databases. We have included links to the
+        Human Relations Area Files (HRAF) (Murdock 1983), a repository of annotated
         primary literature that can be searched by topic e.g., marriage system (see this page on eHRAF and D-PLACE
-        collaboration) and the CHIRILA database of Australian languages (Bowern 2016).
+        collaboration).
     </p>
     <p>
         These links to other cross-cultural datasets appear at the top of individual “Society” results pages. Kirby et
@@ -84,16 +79,15 @@
     <p>
         The language spoken by a society is an important indicator for historical relatedness, cultural identity and
         contact. D-PLACE specifies the broad language family affiliation for all societies, using the classification
-        systems of Glottolog (Hammarström et al. 2015). Users can treat language family as a variable of interest
+        systems of Glottolog (Hammarström et al. 2023). Users can treat language family as a variable of interest
         itself, or can use it as a coarse-level control for relatedness among societies (e.g., Botero et al. 2014).
     </p>
     <h5>Historical relationships among languages: Glottolog trees</h5>
     <p>
         At a closer resolution, all societies in D-PLACE have been linked to a language and, in cases where the language
-        was shared with another D-PLACE society, to a Glottolog dialect. Languages are identified by both a Glottolog ID
-        and an ISO 639-3 code, and dialects by a Glottolog ID (Hammarström et al. 2015; SIL International 2015). For
-        languages for which an ISO 639-3 code has not been assigned, we use a D-PLACE serial number as a place-holder
-        (x01, x02...; all within the ISO-639-3 private use range). Languages and dialects are used by D-PLACE to link
+        was shared with another D-PLACE society, to a Glottolog dialect. Languages are identified by both a Glottocode
+        and an ISO 639-3 code, and dialects by a Glottocode (Hammarström et al. 2023; SIL International 2015).
+        Languages and dialects are used by D-PLACE to link
         each society to Glottolog’s language classification trees. These trees are topological only, representing
         genealogical hypotheses of how languages are nested, based on comparative historical linguistic work. The
         classifications are purely taxonomies and branch lengths do not represent time or amount of change.
@@ -120,10 +114,8 @@
 
 <%util:section title="Environmental data" level="4" id="env">
     <p>
-        We sampled environmental variables at the localities reported for each society in each dataset (EA, Binford,
-        WNAI, SCCS), with some adjustments to geographic coordinates as outlined in Kirby et al. (2016). Both the
-        original and revised latitude and longitude for all societies are included in CSV downloads of search results
-        from this site.
+        We sampled environmental variables at the localities reported for each society in each dataset, with some
+        adjustments to geographic coordinates as outlined in Kirby et al. (2016).
     </p>
     <h4>Climate</h4>
     <p>

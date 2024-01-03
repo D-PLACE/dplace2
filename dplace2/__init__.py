@@ -72,11 +72,6 @@ def main(global_config, **settings):
     config.registry.registerUtility(DplaceCtxFactoryQuery(), ICtxFactoryQuery)
     config.registry.registerUtility(DplaceMapMarker(), IMapMarker)
 
-    config.register_adapter(
-        adapters.VariableCsvAdapter,
-        IParameter,
-        IRepresentation,
-        name=adapters.VariableCsvAdapter.mimetype)
     #config.register_adapter(None, IParameter, IIndex, name='application/atom+xml')
     config.registry.unregisterAdapter(required=[IParameter], provided=IIndex, name='application/atom+xml')
 

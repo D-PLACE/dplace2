@@ -18,7 +18,12 @@
         <h2>${title()}</h2>
 
         % if ctx.description:
-            <div class="alert alert-info">${ctx.description}</div>
+            <div class="alert alert-info">
+                ${ctx.description}
+                % if ctx.glottolog:
+                    <p>${u.glottolog.link(req, id=ctx.id, label=ctx.name)|n}</p>
+                % endif
+            </div>
         % endif
         % if tree.parameters:
             <div class="alert alert-success">
@@ -44,12 +49,7 @@
     </div>
 
     <div class="span4">
-        <% ca = h.get_adapter(h.interfaces.IRepresentation, ctx, req, ext='description.html') %>
-        % if ca:
-            <div class="well well-small">
-                ${ca.render(ctx, req)|n}
-            </div>
-        % endif
+        ${u.citation(req, ctx)|n}
         % if tree.parameters:
             <div class="accordion" id="values-acc" data-spy="affix" data-offset-top="0"
                  style="margin-right: 10px;">

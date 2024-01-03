@@ -79,7 +79,7 @@
         </div>
     </div>
     <div class="span5">
-        <div class="vtable ${ctx.dataset.type}">
+        <div class="vtable ${ctx.datatype}">
             <dl>
                 <dt>Dataset:</dt>
                 <dd>${h.link(request, ctx.dataset)}</dd>

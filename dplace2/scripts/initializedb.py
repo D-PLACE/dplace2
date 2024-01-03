@@ -1,359 +1,119 @@
-import sys
-from itertools import groupby, chain
-import re
-from colorsys import hsv_to_rgb
-from collections import defaultdict, OrderedDict
 import math
-from pathlib import Path
+import itertools
+import collections
 
+from tqdm import tqdm
 import transaction
 from sqlalchemy import func, distinct
 from sqlalchemy.orm import joinedload
-from clldutils.misc import slug
 from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clldutils.color import qualitative_colors, sequential_colors, diverging_colors
 from clld.lib.bibtex import Database
-from pydplace.api import Repos
+from clldutils.color import qualitative_colors
+from pyglottolog import Glottolog
+from pycldf.trees import TreeTable
+from clld_phylogeny_plugin.models import TreeLabel, Phylogeny
 
-import dplace2
 from dplace2 import models
-from clld_phylogeny_plugin.models import TreeLabel, LanguageTreeLabel, Phylogeny
+from .util import add_metadata, add_society, add_variable, color, add_values, add_phylogeny
 
-DATA_REPOS = Path(dplace2.__file__).parent / '..' / '..' / 'dplace-data'
-
-biomes = {
-    '01': '#00ff00',
-    '02': '#b2e519',
-    '03': '#adff2f',
-    '04': '#3cb371',
-    '05': '#3cb371',
-    '06': '#d5fe00',
-    '07': '#feac00',
-    '08': '#ffd700',
-    '09': '#7fffd4',
-    '10': '#d2b48c',
-    '11': '#00cc00',
-    '12': '#ff0000',
-    '13': '#f08080',
-    '14': '#9f21a3',
-    '15': '#ffffff',
-    '16': '#d5d8e6',
-    '99': '#000000',
+SSID_MAP = {
+    'dplace-dataset-ea': 'EA',
+    'dplace-dataset-binford': 'Binford',
+    'dplace-dataset-sccs': 'SCCS',
+    'dplace-dataset-wnai': 'WNAI',
 }
 
-SHAPES = list('ctfds')
 
-
-def get_batches(codes):  # pragma: no cover
-    try:
-        code_map = {int(code.code): code.code for code in codes}
-        codes = list(code_map.keys())
-    except ValueError:
-        return
-    codes = sorted(codes, key=lambda n: n or 0)
-    if len(codes) > 1 and codes[0] == 10 and codes[1] == 20:
-        res = defaultdict(list)
-        for code in codes:
-            res[code // 10].append(code_map[code])
-        if max(len(v) for v in res.values()) <= len(SHAPES):
-            return [list(zip(v, SHAPES)) for k, v in sorted(res.items())]
-
-
-def valid_id(s):  # pragma: no cover
-    return s.replace('.', '_')
+def nname(s):
+    return (s.replace('D-PLACE dataset derived from ', '')
+            .replace('Phlorest phylogeny derived from ', ''))
 
 
 def main(args):  # pragma: no cover
     data = Data()
-    repos = Repos(DATA_REPOS)
+    cldf = args.cldf
 
-    dataset = common.Dataset(
-        id=dplace2.__name__,
-        name="D-PLACE",
-        publisher_name="Max Planck Institute for Evolutionary Anthropology",
-        publisher_place="Leipzig",
-        publisher_url="https://www.eva.mpg.de",
-        license="http://creativecommons.org/licenses/by-nc/4.0/",
-        contact='dplace@eva.mpg.de',
-        domain='dplace2.clld.org',
-        jsondata={
-            'license_icon': 'cc-by-nc.png',
-            'license_name': 'Creative Commons Attribution-NonCommercial 4.0 International License'})
+    assert args.glottolog
+    glottolog = Glottolog(args.glottolog)
 
-    for i, (id_, name) in enumerate([
-        ('kirbykate', 'Kate Kirby'),
-        ('greenhillsimon', 'Simon Greenhill'),
-        ('forkelrobert', 'Robert Forkel'),
-    ]):
-        ed = data.add(common.Contributor, id_, id=id_, name=name)
-        common.Editor(dataset=dataset, contributor=ed, ord=i + 1)
-    DBSession.add(dataset)
+    DBSession.add(add_metadata(data))
 
-    for rec in Database.from_file(repos.path('sources.bib'), lowercase=True):
+    for rec in Database.from_file(args.cldf.bibpath):
         data.add(common.Source, rec.id, _obj=bibtex2source(rec))
 
-    regions = repos.read_json('geo', 'societies_tdwg.json')
-    glottolog = {
-        r.id: r for r in repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
-    dscolors = qualitative_colors(len(repos.datasets))
-    dss = {}
+    societies_by_dataset = {
+        dsid: list(rows) for dsid, rows in itertools.groupby(
+            itertools.takewhile(lambda r: r['type'] == 'society', cldf['LanguageTable']),
+            lambda r: r['Contribution_ID'])}
+    variables_by_dataset = {
+        dsid: list(rows) for dsid, rows in itertools.groupby(
+            cldf['ParameterTable'], lambda r: r['Contribution_ID'])}
+    codes_by_variable = {
+        vid: list(rows) for vid, rows in itertools.groupby(
+            cldf['CodeTable'], lambda r: r['Var_ID'])}
+    glangs = {lg.id: lg for lg in glottolog.languoids()}
+    societies_by_glottocode = collections.defaultdict(list)
+    dscolors = qualitative_colors(
+        sum(1 for x in cldf['ContributionTable'] if x['type'] == 'dataset'))
     altname_count = 0
-    for i, ds in enumerate(sorted(repos.datasets, key=lambda d: (d.type, d.id if d.id != 'EA' else 'AA'))):
-        if ds.societies:
+    for i, ds in enumerate(sorted(
+            cldf['ContributionTable'],
+            key=lambda d: (d['type'], d['ID'] if d['ID'] != 'EA' else 'AA'))):
+        if ds['ID'] in societies_by_dataset:
             societyset = data.add(
                 models.Societyset,
-                ds.id,
-                id=ds.id,
-                name=ds.name,
-                description=ds.description,
-                reference=ds.reference,
+                ds['ID'],
+                id=SSID_MAP.get(ds['ID'], ds['ID']),
+                name=nname(ds['Name']),
+                description=ds['Description'],
+                reference=ds['Citation'],
+                doi=ds['DOI'],
                 color=dscolors[i])
-            for soc in ds.societies:
-                s = data.add(
-                    models.Society,
-                    soc.id,
-                    id=soc.id,
-                    xid=soc.xd_id,
-                    name=soc.pref_name_for_society,
-                    latitude=soc.Lat,
-                    longitude=soc.Long,
-                    region=regions.get(soc.id, {}).get('name'),
-                    societyset=societyset,
-                    hraf_id=soc.HRAF_name_ID.id if soc.HRAF_name_ID else None,
-                    hraf_name=soc.HRAF_name_ID.name if soc.HRAF_name_ID else None,
-                    glottocode=soc.glottocode,
-                    year=soc.main_focal_year,
-                    name_in_source=soc.ORIG_name_and_ID_in_this_dataset,
-                    language=glottolog[soc.glottocode].name,
-                    language_family=glottolog[soc.glottocode].family_name or None,
-                )
-                for n in soc.alt_names_by_society:
-                    altname_count += 1
-                    common.LanguageIdentifier(
-                        language=s,
-                        identifier=common.Identifier(
-                            name=n, type='Other names', id=str(altname_count)))
+            for soc in societies_by_dataset[ds['ID']]:
+                add_society(data, societyset, soc, glangs, societies_by_glottocode, altname_count)
 
-        if ds.variables:
+        if ds['ID'] in variables_by_dataset:
             dataset = data.add(
                 models.DplaceDataset,
-                ds.id,
-                id=ds.id,
-                name=ds.name,
-                description=ds.description,
-                reference=ds.reference,
-                type=ds.type)
-            for row in ds.variables:
-                v = data.add(
-                    models.Variable,
-                    row.id,
-                    id=valid_id(row.id),
-                    name='{0} [{1}]'.format(row.title, row.id),
-                    description=row.definition,
-                    type=row.type,
-                    dataset=dataset,
-                )
-                for cat in set(row.category):
-                    obj = data['Category'].get(slug(cat))
-                    if not obj:
-                        obj = data.add(models.Category, slug(cat), id=slug(cat), name=cat)
-                    DBSession.add(models.VariableCategory(variable=v, category=obj))
-
-                codes = [code for code in row.codes if code.code != 'NA']
-                batches = get_batches(codes)
-                ncolors = len(batches) if batches else len(codes)
-                colors = qualitative_colors(ncolors)
-                if v.type == 'Ordinal':
-                    codes = sorted(codes, key=lambda c: float(c.code))
-                    if 3 <= ncolors <= 9:
-                        colors = sequential_colors(ncolors)
-                    elif 10 <= ncolors <= 11:
-                        colors = diverging_colors(ncolors)
-                    elif ncolors > 11:
-                        colors = [color(float(codes[0].code), float(codes[-1].code), float(c.code)) for c in codes]
-                if batches:
-                    icons = {}
-                    for batch, color_ in zip(batches, colors):
-                        for c, shape in batch:
-                            icons[c] = shape + color_[1:]
-                else:
-                    icons = dict(zip([c.code for c in codes], ['c' + c.replace('#', '') for c in colors]))
-                for code in codes:
-                    icon = icons[code.code]
-                    if v.id == 'EcoRegion':
-                        icon = 'c' + biomes[code.code[1:3]][1:]
-                    elif v.id == 'Biome':
-                        icon = 'c' + biomes['{0:02}'.format(int(code.code))][1:]
-
-                    try:
-                        number = int(code.code)
-                    except ValueError:
-                        number = None
-
-                    data.add(
-                        models.Code,
-                        (v.id, code.code),
-                        id=valid_id('{0}-{1}'.format(code.var_id, code.code)),
-                        number=number,
-                        abbr=code.code,
-                        name=code.name,
-                        description=code.description,
-                    icon=icon,
-                    parameter=v,
-                )
-        dss[ds.id] = ds
+                ds['ID'],
+                id=SSID_MAP.get(ds['ID'], ds['ID']),
+                name=nname(ds['Name']),
+                description=ds['Description'],
+                doi=ds['DOI'],
+                reference=ds['Citation'])
+            for row in variables_by_dataset[ds['ID']]:
+                add_variable(data, dataset, row, codes_by_variable)
 
     DBSession.flush()
-
-    for ds in dss.values():
-        #
-        # FIXME: do we have to evaluate xd_id as well?
-        #
-        for relsocs in ds.society_relations:
-            soc = data['Society'][relsocs.id]
-            for relsoc in relsocs.related:
-                if relsoc.dataset in dss and relsoc.id in data['Society']:
-                    # A relation between two societies in D-PLACE!
-                    DBSession.add(
-                        models.SocietyRelation(from_pk=soc.pk, to_pk=data['Society'][relsoc.id].pk))
-                else:
-                    # An external relation; we just add a LanguageIdentifier
-                    identifier = data['Identifier'].get((relsoc.dataset, relsoc.id))
-                    if not identifier:
-                        identifier = data.add(
-                            common.Identifier,
-                            (relsoc.dataset, relsoc.id),
-                            id='{0}-{1}'.format(relsoc.dataset, relsoc.id),
-                            name='{0}'.format(relsoc),
-                            type=relsoc.dataset)
-                    DBSession.add(common.LanguageIdentifier(language=soc, identifier=identifier))
+    societies_by_glottocode = {
+        gc: [s.pk for s in vals] for gc, vals in societies_by_glottocode.items()}
 
     transaction.commit()
 
-    for row in repos.phylogenies:
+    #
+    # Load Values in one transaction per variable.
+    #
+    # We rely on ValueTable being sorted by Var_ID, Soc_ID!
+    for var_id, values in tqdm(itertools.groupby(cldf['ValueTable'], lambda r: r['Var_ID'])):
         transaction.begin()
-        soc_by_id = {}
-        soc_by_xid = defaultdict(list)
-        for s in DBSession.query(models.Society):
-            soc_by_id[s.id] = s.pk
-            soc_by_xid[s.xid].append(s.pk)
-
-        tree = models.DplacePhylogeny(
-            id=row.id,
-            name=row.name,
-            description=row.reference,
-            glottolog=row.is_glottolog,
-            newick=row.newick,
-            author=row.author,
-            year=int(row.year),
-            url=row.url,
-            reference=row.reference,
-        )
-        for k, taxon in enumerate(row.taxa):
-            label = TreeLabel(
-                id='{0}-{1}-{2}'.format(tree.id, slug(taxon.taxon), k + 1),
-                name=taxon.taxon,
-                phylogeny=tree,
-                description=taxon.glottocode)
-            socpks = []
-            for x in taxon.soc_ids:
-                if x in soc_by_id:
-                    spk = soc_by_id[x]
-                    if spk not in socpks:
-                        socpks.append(spk)
-            for x in taxon.xd_ids:
-                if x in soc_by_xid:
-                    for spk in soc_by_xid[x]:
-                        if spk not in socpks:
-                            socpks.append(spk)
-            for i, spk in enumerate(socpks):
-                LanguageTreeLabel(ord=i + 1, language_pk=spk, treelabel=label)
-
-        DBSession.add(tree)
+        add_values(var_id, values)
         transaction.commit()
 
-    year_pattern = re.compile('(?P<year>-?[0-9]+)')
-    for cid, ds in dss.items():
-        args.log.info('processing dataset ' + cid)
+    languoids_by_phylogeny = {
+        dsid: list(rows) for dsid, rows in itertools.groupby(
+            itertools.dropwhile(lambda r: r['type'] == 'society', cldf['LanguageTable']),
+            lambda r: r['Contribution_ID'])}
+    trees = {t.row['Contribution_ID']: t for t in TreeTable(cldf)}
+    for row in itertools.dropwhile(
+            lambda r: r['type'] == 'dataset',
+            sorted(cldf['ContributionTable'], key=lambda d: (d['type'], d['ID']))
+    ):
         transaction.begin()
-        dsdata = Data()
-        c = models.DplaceDataset.get(cid)
-
-        societies = {
-            k: v for k, v in DBSession.query(models.Society.id, models.Society.pk)}
-        variables = {
-            k: v for k, v in DBSession.query(models.Variable.id, models.Variable.pk)}
-        codes = {
-            k: v for k, v in DBSession.query(models.Code.id, models.Code.pk)}
-        sources = {
-            k: v for k, v in DBSession.query(common.Source.id, common.Source.pk)}
-
-        for (var_id, soc_id), rows in groupby(
-            sorted(ds.data, key=lambda r: (r.var_id, r.soc_id)), lambda r: (r.var_id, r.soc_id)
-        ):
-            rows = [row for row in rows if row.code != 'NA']
-            if not rows:
-                continue
-
-            vsid = '{0}-{1}'.format(var_id, soc_id).replace('.', '_')
-            vs = data.add(
-                common.ValueSet,
-                vsid,
-                id=vsid,
-                contribution=c,
-                language_pk=societies[soc_id],
-                parameter_pk=variables[valid_id(var_id)],
-            )
-            for i, row in enumerate(rows):
-                name = row.code
-                m = year_pattern.match(row.year or '')
-                if m:
-                    name += ' ({0})'.format(m.group('year'))
-                if row.sub_case:
-                    name += ' [{0}]'.format(row.sub_case)
-
-                vid = '{0}-{1}'.format(vsid, i + 1)
-                v, k = None, None
-                code = codes.get(valid_id('{0}-{1}'.format(var_id, row.code)))
-                if code:
-                    k = (vsid, code, name)
-                    v = dsdata['Datapoint'].get(k)
-                    if v:
-                        v.frequency += 1
-                if not v:
-                    try:
-                        fv = float(row.code)
-                    except (TypeError, ValueError):
-                        fv = None
-                    v = models.Datapoint(
-                        id=vid,
-                        valueset=vs,
-                        name=name,#row['code'],
-                        comment=row.comment,
-                        year=int(m.group('year')) if m else None,
-                        sub_case=row.sub_case,
-                        value_float=fv,
-                        frequency=1,
-                        domainelement_pk=code)
-                if code and k:
-                    dsdata['Datapoint'][k] = v
-                for ref in row.references:
-                    models.DatapointReference(
-                        value=v, source_pk=sources[ref.key], description=ref.pages or None)
+        add_phylogeny(
+            row, nname(row['Name']), trees[row['ID']], languoids_by_phylogeny[row['ID']], societies_by_glottocode)
         transaction.commit()
-
-
-def color(minval, maxval, val):  # pragma: no cover
-    """ Convert val in range minval..maxval to the range 0..120 degrees which
-        correspond to the colors Red and Green in the HSV colorspace.
-    """
-    h = 120 - (float(val-minval) / (maxval-minval)) * 120
-
-    # Convert hsv color (h,1,1) to its rgb equivalent.
-    # Note: hsv_to_rgb() function expects h to be in the range 0..1 not 0..360
-    return '#' + ''.join("{0:02x}".format(int(255*n)) for n in hsv_to_rgb(h/360, 1., 1.))
 
 
 def mlog(n):  # pragma: no cover
@@ -365,7 +125,7 @@ def prime_cache(args):  # pragma: no cover
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
     """
-    args.log.info('processing prine cache')
+    args.log.info('processing prime cache')
     for var in DBSession.query(models.Variable).options(
         joinedload(models.Variable.category_assocs).joinedload(models.VariableCategory.category)
     ):
@@ -377,11 +137,11 @@ def prime_cache(args):  # pragma: no cover
         socs_by_var[var.pk] = set(vs.language_pk for vs in var.valuesets)
         if var.type != 'Continuous':
             continue
-        values = [v.value_float for v in chain(*[vs.values for vs in var.valuesets])]
+        values = [v.value_float for v in itertools.chain(*[vs.values for vs in var.valuesets])]
         cminimum = minimum = min(values)
         cmaximum = maximum = max(values)
 
-        dist = OrderedDict()  # We compute the distribution of values on equidistant intervals.
+        dist = collections.OrderedDict()  # We compute the distribution of values on equidistant intervals.
         step = (maximum - minimum) / 10
         val = minimum
         while val < maximum:
@@ -428,7 +188,7 @@ def prime_cache(args):  # pragma: no cover
 
     for ds in DBSession.query(models.DplaceDataset):
         for sspk in DBSession.query(models.Society.societyset_pk).join(common.ValueSet).filter(common.ValueSet.contribution_pk == ds.pk).distinct():
-            DBSession.add(models.DatasetSocietyset(dataset_pk=ds.pk, societyset_pk=sspk))
+            DBSession.add(models.DatasetSocietyset(dataset_pk=ds.pk, societyset_pk=sspk[0]))
 
     counts = DBSession.query(
         models.Variable.dataset_pk, func.count(models.Variable.pk)).group_by(models.Variable.dataset_pk).all()
@@ -450,7 +210,7 @@ group by l.pk""")}
 
     for phy in DBSession.query(Phylogeny).options(
             joinedload(Phylogeny.treelabels).joinedload(TreeLabel.language_assocs)):
-        soc_set = defaultdict(list)
+        soc_set = collections.defaultdict(list)
         for tl in phy.treelabels:
             for la in tl.language_assocs:
                 soc_set[la.language_pk].append(tl.name)

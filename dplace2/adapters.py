@@ -5,30 +5,10 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.interfaces import IParameter
 from clld.web.adapters.geojson import GeoJson, GeoJsonParameter
-from clld.web.adapters.csv import CsvAdapter
-from clld.interfaces import IIndex
 from clld_phylogeny_plugin.tree import Tree
 from clld_phylogeny_plugin.interfaces import ITree
-from csvw.dsv import UnicodeWriter
 
 from dplace2.models import get_icon
-
-
-class VariableCsvAdapter(CsvAdapter):
-    def render(self, ctx, req):
-        cols = None
-        with UnicodeWriter() as writer:
-            for v in chain(*[vs.values for vs in ctx.valuesets]):
-                if not cols:
-                    cols = v.csv_head()
-                    writer.writerow(cols)
-                writer.writerow(v.to_csv(ctx=ctx, req=req, cols=cols))
-            return writer.read()
-
-    def render_to_response(self, ctx, req):
-        res = super(CsvAdapter, self).render_to_response(ctx, req)
-        res.content_disposition = 'attachment; filename="dplace_variable_%s.csv"' % ctx.id
-        return res
 
 
 class VariableTree(Tree):

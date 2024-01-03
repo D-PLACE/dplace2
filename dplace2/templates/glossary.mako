@@ -33,7 +33,7 @@
     <p>
         D-PLACE lets you visualize cross-cultural data in three ways: as a list in a table, on a global map, or on a
         linguistic tree (i.e., phylogeny or classification). Data points (i.e., rows in the table, points on the map,
-        points on the tree) represent the expression of a particular cultural feature by a particular society at a given
+        leafs on the tree) represent the expression of a particular cultural feature by a particular society at a given
         time and place, as recorded by the <a href="${req.route_url('sources')}">Source</a>.
         Data points are colour-coded to allow
         you to quickly assess the diversity of a cultural feature across societies in the table, map, or linguistic
@@ -53,7 +53,6 @@
         <a href="${req.route_url('contributions')}">Dataset</a>
         and has been coded for a particular <a href="${req.route_url('societysets')}">Society Set</a>.
     </p>
-
     <p>
         Variables are listed by ‘name’ and unique ‘variable ID’ (e.g., “Games [EA035]”, “Games at Initial Funeral
         Ceremonies [SCCS1987]”), and can be sorted by “Dataset”.
@@ -89,9 +88,9 @@
 
 <%util:section title="2. Who created D-PLACE?" level="4" id="q1">
     <p>
-        D-PLACE relies on existing cross-cultural, linguistic and environmental datasets that themselves are the product
-        of decades of work by scientists, translators, transcribers and research participants. The D-PLACE database
-        itself was designed and developed by a
+        D-PLACE relies on existing cross-cultural, linguistic and environmental datasets that themselves
+        are the product of decades of work by scientists, translators, transcribers and research participants.
+        The D-PLACE database itself was designed and developed by a
         <a href="${req.route_url('about', _anchor='team')}">team of scientists</a> from a range of disciplines.
     </p>
 </%util:section>
@@ -109,9 +108,11 @@
 <%util:section title="4. Who funded D-PLACE?" level="4" id="q3">
     <p>
         D-PLACE was developed with generous support from the
-        ${h.external_link('https://nescent.org', label='National Evolutionary Synthesis Center')}}
+        ${h.external_link('https://nescent.org', label='National Evolutionary Synthesis Center')}},
+        the
+        ${h.external_link('https://www.shh.mpg.de', label='Max Planck Institute for the Science of Human History')}
         and the
-        ${h.external_link('https://www.shh.mpg.de', label='Max Planck Institute for the Science of Human History')}.
+        ${h.external_link('https://www.eva.mpg.de', label='Max Planck Institute for Evolutionary Anthropology')}.
     </p>
 </%util:section>
 
@@ -219,18 +220,10 @@
 
 <%util:section title="12. I would like to contribute to D-PLACE. Where do I start?" level="4" id="q11">
     <p>
-        We welcome contributions to D-PLACE, including both corrections to data and new contributions. Five types of
+        We welcome contributions to D-PLACE, including both corrections to data and new contributions. Several types of
         contribution are possible:
     </p>
     <ol>
-        <li>
-            A new, independent society set: each society in a set must be accompanied by information on its geographic
-            location (latitude and longitude coordinates), main year of documentation (“focal year”), language spoken,
-            and primary sources (e.g., reference(s) for source ethnographies, and/or identity of observers). This
-            ‘pinpointing’ information can be used by future contributors to ensure that additional variables are coded
-            for the same group of people at the same time and place. An example of a stand-alone society set in D-PLACE
-            is the HRAF society set [coming soon!].
-        </li>
         <li>
             A new, independent variable (set): variables are cultural features or practices, or environmental
             descriptors. Variables must be clearly defined (e.g., What is meant by “Dependence on fishing?”. If
@@ -292,10 +285,7 @@
         linguists on our team, and have worked carefully to verify that society-language matches are correct. For more
         on the approach we have taken to digitization/dataset correction, please see the supplementary information of
         Kirby et al. 2016. More recent changes are being documented on our GitHub site, and therefore are publicly
-        traceable. Finally, D-PLACE is being
-        ${h.external_link('https://github.com/D-PLACE/dplace-data/releases', label='versioned')}
-        and releases archived and accessible through
-        ${h.external_link('https://doi.org/10.5281/zenodo.596376', label='ZENODO')},
+        traceable. Finally, D-PLACE is being versioned and releases archived are accessible through Zenodo,
         so any analyses that rely on D-PLACE can cite the particular version of the data that were used, enhancing
         replicability.
     </p>
@@ -303,14 +293,6 @@
 
 <%util:section title="15. Can I download the entire database, and work with it on a platform I prefer?" level="4" id="q14">
     <p>
-        The folders in our
-        ${h.external_link('https://github.com/D-PLACE/dplace-data/', label='data repository on GitHub')}
-        include raw CSV files that can be downloaded and manipulated outside of D-PLACE.
-        Please note the version of D-PLACE you download, as we are constantly correcting the datasets.
-    </p>
-    <p>
-        If you work with the Python programming language, you may also use the Python package
-        ${h.external_link('https://github.com/D-PLACE/pydplace', label='pydplace')} for programmatic
-        access to D-PLACE data.
+        See the <a href="${req.route_url('download')}">download page</a> for details.
     </p>
 </%util:section>

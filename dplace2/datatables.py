@@ -3,7 +3,7 @@ from clld.web.datatables.base import (
     Col, LinkCol, LinkToMapCol, IdCol, DetailsRowLinkCol, RefsCol, DataTable,
 )
 from clld.web.datatables.language import Languages
-from clld.web.datatables.contribution import Contributions, CitationCol
+from clld.web.datatables.contribution import Contributions
 from clld.web.datatables.parameter import Parameters
 from clld.web.datatables.value import Values, ValueNameCol
 from clld.web.datatables.source import Sources
@@ -102,11 +102,6 @@ class Datasets(Contributions):
     def col_defs(self):
         return [
             LinkCol(self, 'name'),
-            Col(self,
-                'type',
-                input_size='mini',
-                model_col=DplaceDataset.type,
-                choices=get_distinct_values(DplaceDataset.type)),
             DetailsRowLinkCol(self, 'more', button_text='themes'),
             Col(self,
                 'cvars',
@@ -119,7 +114,6 @@ class Datasets(Contributions):
                 sTitle='# societies',
                 model_col=DplaceDataset.count_societies),
             SocietysetsCol(self, 'societysets', sTitle='Society sets'),
-            CitationCol(self, 'cite'),
         ]
 
 
@@ -167,7 +161,9 @@ class Societies(Languages):
 class FloatCol(Col):
     def format(self, item):
         return HTML.span(
-            '{0:,}'.format(item.value_float), literal('&nbsp;'), map_marker_img(self.dt.req, item))
+            item.name if item.value_float is None else '{0:,}'.format(item.value_float),
+            literal('&nbsp;'),
+            map_marker_img(self.dt.req, item))
 
 
 class Datapoints(Values):

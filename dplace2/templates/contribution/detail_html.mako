@@ -3,10 +3,7 @@
 <%! active_menu_item = "contributions" %>
 
 <%def name="sidebar()">
-    <div class="well well-small">
-        <h4>Source</h4>
-        <p>${ctx.reference}</p>
-    </div>
+    ${u.citation(req, ctx)|n}
     <div class="well well-small">
         <h4>Focal time period</h4>
         <table class="table table-condensed table-nonfluid">

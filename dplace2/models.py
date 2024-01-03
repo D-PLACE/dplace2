@@ -15,7 +15,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 
 from clld import interfaces
-from clld.db.meta import Base, CustomModelMixin, PolymorphicBaseMixin
+from clld.db.meta import Base, CustomModelMixin, PolymorphicBaseMixin, DBSession
 from clld.db.models.common import (
     Language, Contribution, Parameter, DomainElement, IdNameDescriptionMixin, Value,
     ValueSet,
@@ -47,6 +47,7 @@ class WithSourceMixin(object):
     author = Column(Unicode)
     url = Column(Unicode)
     reference = Column(Unicode)
+    doi = Column(Unicode)
 
 
 class VariablePhylogeny(Base):
@@ -71,15 +72,9 @@ class DatasetSocietyset(Base):
 class DplaceDataset(CustomModelMixin, Contribution, WithSourceMixin):
     pk = Column(Integer, ForeignKey('contribution.pk'), primary_key=True)
     reference = Column(Unicode)
-    type = Column(Unicode)
     count_societies = Column(Integer)
     count_variables = Column(Integer)
     societysets = relationship(Societyset, secondary=DatasetSocietyset.__table__)
-
-
-class SocietyRelation(Base):
-    from_pk = Column(Integer, ForeignKey('society.pk'))
-    to_pk = Column(Integer, ForeignKey('society.pk'))
 
 
 @implementer(interfaces.ILanguage)
@@ -97,19 +92,15 @@ class Society(CustomModelMixin, Language):
     hraf_name = Column(Unicode)
     hraf_id = Column(Unicode)
 
-    @declared_attr
-    def related(cls):
-        return relationship(
-            cls,
-            secondary=SocietyRelation.__table__,
-            primaryjoin=cls.pk==SocietyRelation.from_pk,
-            secondaryjoin=cls.pk==SocietyRelation.to_pk)
+    @property
+    def related(self):
+        return DBSession.query(Society).filter(Society.xid == self.xid and Society.pk != self.pk)
 
     @property
     def hraf_url(self):
         if self.hraf_id:
-            return 'http://ehrafworldcultures.yale.edu/collection?owc={0}'.format(
-                self.hraf_id)
+            return 'https://ehrafworldcultures.yale.edu/cultures/{}/description'.format(
+                self.hraf_id.lower())
 
 
 class SocietyPhylogeny(Base):
@@ -139,6 +130,13 @@ class Variable(CustomModelMixin, Parameter):
     dataset = relationship(DplaceDataset, backref='variables')
     categories_str = Column(Unicode)
     phylogenies = relationship(Phylogeny, secondary=VariablePhylogeny.__table__)
+
+    @property
+    def datatype(self):
+        if set(self.categories_str.split('|')).issubset(
+                {'Climate', 'Ecology', 'Physical Landscape'}):
+            return 'environmental'
+        return 'cultural'
 
     @declared_attr
     def comparable_variables(cls):
@@ -188,40 +186,6 @@ class Datapoint(CustomModelMixin, Value):
         if self.sub_case:
             res += ' [{0}]'.format(self.sub_case)
         return res.strip()
-
-    @classmethod
-    def csv_head(cls):
-        return [
-            'society_id',
-            'society_name',
-            'society_xd_id',
-            'language_glottocode',
-            'language_name',
-            'language_family',
-            'variable_id',
-            'code',
-            'code_label',
-            'focal_year',
-            'sub_case',
-            'comment',
-        ]
-
-    def to_csv(self, ctx=None, req=None, cols=None):
-        return [
-            self.valueset.language.id,
-            self.valueset.language.name,
-            self.valueset.language.xid,
-            self.valueset.language.glottocode,
-            self.valueset.language.language,
-            self.valueset.language.language_family,
-            self.valueset.parameter.id,
-            self.value_float if self.valueset.parameter.type == 'Continuous' else
-            (self.domainelement.id.split('-', 1)[1] if self.domainelement else self.name),
-            self.domainelement.name if self.domainelement else '',
-            self.year,
-            self.sub_case,
-            self.comment,
-        ]
 
 
 class DatapointReference(Base, HasSourceNotNullMixin):

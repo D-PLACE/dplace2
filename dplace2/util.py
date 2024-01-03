@@ -16,6 +16,8 @@ from clld.db.models import common
 from clld.web.util.htmllib import HTML
 from clld.web.util.helpers import external_link, get_referents, link
 from clld.web.util.multiselect import CombinationMultiSelect
+from clld.web.util import glottolog
+from clld.web.util import doi
 from purl import URL
 
 from dplace2 import models
@@ -27,6 +29,18 @@ def phylogeny_detail_html(request=None, context=None, **kw):
         def query(cls):
             return context.variables
     return {'ms': VariableMultiSelect}
+
+
+def citation(req, ctx):
+    refs = ctx.reference.split('\n')
+    content = [
+        HTML.h4('Cite as'),
+        HTML.blockquote(refs[0], HTML.br(), doi.link(req, ctx)
+        ),
+    ]
+    for ref in refs[1:]:
+        content.append(HTML.blockquote(ref))
+    return HTML.div(*content, **dict(class_="well well-small"))
 
 
 def link_sources(req, value, s=None):
