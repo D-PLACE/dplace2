@@ -144,10 +144,11 @@ def add_variable(data, dataset, row, codes_by_variable):
         dataset=dataset,
     )
     for cat in set(row['category']):
-        obj = data['Category'].get(slug(cat))
-        if not obj:
-            obj = data.add(models.Category, slug(cat), id=slug(cat), name=cat)
-        DBSession.add(models.VariableCategory(variable=v, category=obj))
+        if cat:
+            obj = data['Category'].get(slug(cat))
+            if not obj:
+                obj = data.add(models.Category, slug(cat), id=slug(cat), name=cat)
+            DBSession.add(models.VariableCategory(variable=v, category=obj))
 
     codes = [code for code in codes_by_variable.get(row['ID'], []) if not code['ID'].endswith('-NA')]
     if all(not c['ord'] for c in codes):

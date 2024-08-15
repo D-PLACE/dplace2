@@ -32,6 +32,8 @@ def phylogeny_detail_html(request=None, context=None, **kw):
 
 
 def citation(req, ctx):
+    if not ctx.reference:
+        return ''
     refs = ctx.reference.split('\n')
     content = [
         HTML.h4('Cite as'),
