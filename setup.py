@@ -24,6 +24,7 @@ setup(
         'clld_phylogeny_plugin>=1.6.0',
         'sqlalchemy',
         'waitress',
+        'purl',
     ],
     extras_require={
         'dev': [

@@ -102,7 +102,7 @@ def add_metadata(data):
 
 
 def add_society(data, societyset, soc, glangs, societies_by_glottocode, altname_count):
-    glang = glangs[soc['Glottocode']]
+    glang = glangs[soc['Glottocode']] if soc['Glottocode'] else None
     s = data.add(
         models.Society,
         soc['ID'],
@@ -118,10 +118,11 @@ def add_society(data, societyset, soc, glangs, societies_by_glottocode, altname_
         glottocode=soc['Glottocode'],
         year=soc['main_focal_year'],
         name_in_source=soc['Name_and_ID_in_source'],
-        language=glang.name,
-        language_family=glangs[glang.lineage[0][1]].name if glang.lineage else None,
+        language=glang.name if glang else None,
+        language_family=(glangs[glang.lineage[0][1]].name if glang.lineage else None) if glang else None,
     )
-    societies_by_glottocode[soc['Glottocode']].append(s)
+    if soc['Glottocode']:
+        societies_by_glottocode[soc['Glottocode']].append(s)
     if (len(soc['Language_Level_Glottocodes']) == 1
             and soc['Language_Level_Glottocodes'][0] != soc['Glottocode']):
         societies_by_glottocode[soc['Language_Level_Glottocodes'][0]].append(s)
