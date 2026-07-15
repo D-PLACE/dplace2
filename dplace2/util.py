@@ -5,12 +5,11 @@ This module is also used to lookup custom template context providers, i.e. funct
 following a special naming convention which are called to update the template context
 before rendering resource's detail or index views.
 """
-from itertools import chain
 import re
+import urllib.parse
 from collections import Counter
 
 from sqlalchemy import func
-from sqlalchemy.orm import aliased
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.web.util.htmllib import HTML
@@ -18,9 +17,10 @@ from clld.web.util.helpers import external_link, get_referents, link
 from clld.web.util.multiselect import CombinationMultiSelect
 from clld.web.util import glottolog
 from clld.web.util import doi
-from purl import URL
 
 from dplace2 import models
+
+assert glottolog
 
 
 def phylogeny_detail_html(request=None, context=None, **kw):
@@ -53,7 +53,7 @@ def link_sources(req, value, s=None):
 
 
 def ext_link(url):
-    return external_link(url, label=URL(url).domain(), title=url)
+    return external_link(url, label=urllib.parse.urlparse(url).netloc, title=url)
 
 
 def language_detail_html(request=None, context=None, **kw):

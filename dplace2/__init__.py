@@ -58,7 +58,7 @@ def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     settings['route_patterns'] = {
-        'language': '/society/{id:[^/\.]+}',
+        'language': r'/society/{id:[^/\.]+}',
     }
     config = Configurator(settings=settings)
     config.include('clldmpg')
