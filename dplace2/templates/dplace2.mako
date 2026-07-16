@@ -21,7 +21,7 @@
                 <img style="width: 100%;" src="${request.static_url('dplace2:static/nescent_white.png')}"/>
             </a>
         </div>
-        <div class="span3" style="text-align: center;">
+        <div class="span4" style="text-align: center;">
             <% license_icon = h.format_license_icon_url(request) %>
             <a rel="license" href="${request.dataset.license}">
                 <img alt="License" style="border-width:0" src="${license_icon}"/>
@@ -31,23 +31,7 @@
             <a rel="license" href="${request.dataset.license}" style="color: white">
                 ${request.dataset.jsondata.get('license_name', request.dataset.license)}</a>.
         </div>
-        <div class="span2" style="text-align: right;">
-            <a href="https://github.com/D-PLACE/dplace-data"
-               title="D-PLACE data repository on GitHub">
-                <img width="130" src="${request.static_url('dplace2:static/GitHub_Logo_White.png')}" style="margin-bottom: -10px;"/>
-                <br/>
-                <span style="color: red; font-family: monospace; font-size: larger;">&lt;data&gt;</span>
-            </a>
-        </div>
-        <div class="span2" style="text-align: right;">
-            <a href="https://github.com/${request.registry.settings['clld.github_repos']}"
-               title="">
-                <img width="130" src="${request.static_url('dplace2:static/GitHub_Logo_White.png')}" style="margin-bottom: -10px;"/>
-                <br/>
-                <span style="color: red; font-family: monospace; font-size: larger;">&lt;code ${request.registry.settings['clld.git_tag']}&gt;</span>
-            </a>
-        </div>
-        <div class="span1" style="text-align: right; padding-right: 1em;">
+        <div class="span4" style="text-align: right; padding-right: 1em;">
             <a class="clld-privacy-policy"
                style="color: white;"
                href="${request.registry.settings['clld.privacy_policy_url']}">${_('Privacy Policy')}</a><br/>
