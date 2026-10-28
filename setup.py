@@ -25,6 +25,9 @@ setup(
         'sqlalchemy',
         'waitress',
         'purl',
+        'cldfcatalog',
+        'tqdm',
+        'pyglottolog',
     ],
     extras_require={
         'dev': [
