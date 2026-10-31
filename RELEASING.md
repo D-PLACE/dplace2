@@ -2,14 +2,15 @@
 
 ```shell
 git clone --branch v3.3.0 --depth 1 https://github.com/d-place/dplace-cldf
-git clone https://github.com/d-place/dplace2
+git clone --branch v5.3 --depth 1 https://github.com/glottolog/glottolog
+git clone https://github.com/D-PLACE/dplace2
 cd dplace2
 pip install -e .[test]
 ```
 
 Recreate the database:
 ```shell
-clld initdb development.ini --cldf ../dplace-cldf/cldf/StructureDataset-metadata.json --glottolog ../../glottolog/glottolog --glottolog-version v5.3
+clld initdb development.ini --cldf ../dplace-cldf/cldf/StructureDataset-metadata.json --glottolog ../glottolog
 ```
 
 ```shell
@@ -23,8 +24,6 @@ pip freeze > requirements.txt
 
 Store a db dump:
 ```shell
-pg_dump -xO dplace2 > dplace2.sql
-zip dplace2.sql.zip dplace2.sql
-rm dplace2.sql
+pg_dump -xO --compress gzip:9 dplace2 > dplace2.sql.gz
 ```
 
