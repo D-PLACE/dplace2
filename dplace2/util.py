@@ -9,7 +9,7 @@ import re
 import urllib.parse
 from collections import Counter
 
-from sqlalchemy import func
+from sqlalchemy import func, text
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.web.util.htmllib import HTML
@@ -66,7 +66,7 @@ def language_detail_html(request=None, context=None, **kw):
 
 
 def contribution_detail_html(request=None, context=None, **kw):
-    cats = DBSession.execute("""\
+    cats = DBSession.execute(text("""\
 SELECT
     c.name, count(v.pk) as vs FROM category AS c, variablecategory AS vc, variable AS v
 WHERE
@@ -74,7 +74,7 @@ WHERE
 GROUP BY
     c.name
 ORDER BY vs DESC
-""".format(context.pk))
+""".format(context.pk)))
     years = (r[0] for r in DBSession.query(models.Datapoint.year)
         .join(common.ValueSet)
         .filter(common.ValueSet.contribution_pk == context.pk))
