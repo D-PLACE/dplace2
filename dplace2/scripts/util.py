@@ -128,10 +128,10 @@ def add_society(data, societyset, soc, glangs, societies_by_glottocode, altname_
         societies_by_glottocode[soc['Language_Level_Glottocodes'][0]].append(s)
     for n in soc['alt_names_by_society']:
         altname_count += 1
-        common.LanguageIdentifier(
+        DBSession.add(common.LanguageIdentifier(
             language=s,
             identifier=common.Identifier(
-                name=n, type='Other names', id=str(altname_count)))
+                name=n, type='Other names', id=str(altname_count))))
 
 
 def add_variable(data, dataset, row, codes_by_variable):
@@ -258,12 +258,13 @@ def add_values(var_id, values):
                     value_float=fv,
                     frequency=1,
                     domainelement_pk=code)
+                DBSession.add(v)
             if code and k:
                 dsdata['Datapoint'][k] = v
             for ref in row['Source']:
                 sid, pages = Sources.parse(ref)
-                models.DatapointReference(
-                    value=v, source_pk=sources[sid], description=pages or None)
+                DBSession.add(models.DatapointReference(
+                    value=v, source_pk=sources[sid], description=pages or None))
 
 
 def add_phylogeny(row, name, cldftree, languoids, societies_by_glottocode):

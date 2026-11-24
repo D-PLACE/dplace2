@@ -4,7 +4,7 @@ import collections
 
 from tqdm import tqdm
 import transaction
-from sqlalchemy import func, distinct
+from sqlalchemy import func, distinct, text
 from sqlalchemy.orm import joinedload
 from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
@@ -199,11 +199,11 @@ def prime_cache(args):  # pragma: no cover
         ss.count_societies = len(ss.societies)
 
     srs = {
-        k: v for k, v in DBSession.execute("""\
+        k: v for k, v in DBSession.execute(text("""\
 select l.pk, array_agg(distinct dpr.source_pk) 
 from language as l, valueset as vs, value as v, datapointreference as dpr 
 where l.pk = vs.language_pk and vs.pk = v.valueset_pk and v.pk = dpr.value_pk 
-group by l.pk""")}
+group by l.pk"""))}
     for lpk, sspks in srs.items():
         for spk in sspks:
             DBSession.add(common.LanguageSource(language_pk=lpk, source_pk=spk))
